@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mhudart_common/mhdart_common.dart';
 
-import '../dart/rxvar.dart';
 import 'widgets.dart';
 
 
@@ -21,7 +21,7 @@ class RxBuilder<T> extends StatelessWidget {
     return StreamBuilder<T>(
       initialData: stream.value,
       stream: stream.tail,
-      builder: (context, snapshot) => builder(context, snapshot.requireData),
+      builder: (context, snapshot) => builder(context, snapshot.data as T),
     );
   }
 }
@@ -64,4 +64,30 @@ extension WidgetX on Widget {
           }
         },
       );
+}
+
+
+
+extension NullableRxValWidgetX<T extends Object> on RxVal<T?> {
+  Widget loadingOr(Widget Function(BuildContext context, T value) builder) => RxBuilder(
+    stream: this,
+    builder: (context, value) {
+      if (value == null) {
+        return const LoadingWidget();
+      } else {
+        return builder(context, value);
+      }
+    },
+  );
+
+  Widget nullOr(Widget Function(BuildContext context, T value) builder) => RxBuilder(
+    stream: this,
+    builder: (context, value) {
+      if (value == null) {
+        return const NullWidget();
+      } else {
+        return builder(context, value);
+      }
+    },
+  );
 }

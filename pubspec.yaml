@@ -14,6 +14,8 @@ dependencies:
   logging: ^1.1.1
   retry: ^3.1.0
   rxdart: ^0.27.7
+  mhudart_common:
+    path: ../mhudart_common
 
 dev_dependencies:
   flutter_test:
