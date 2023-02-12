@@ -1,10 +1,8 @@
+import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:mhudart_common/mhdart_common.dart';
 
 import 'widgets.dart';
-
-
-
 
 class RxBuilder<T> extends StatelessWidget {
   final Widget Function(BuildContext context, T value) builder;
@@ -27,31 +25,28 @@ class RxBuilder<T> extends StatelessWidget {
 }
 
 class RxText<T> extends StatelessWidget {
-  final RxVal<T> _stream;
-  final String Function(T value) _text;
+  final RxVal<String> _stream;
 
-  const RxText(this._stream, this._text, {super.key});
+  const RxText(this._stream,  {super.key});
 
   @override
   Widget build(BuildContext context) {
     return RxBuilder(
       stream: _stream,
       builder: (context, value) {
-        return Text(_text(value));
+        return Text(value);
       },
     );
   }
 }
 
 extension RxValWidgetX<T> on RxVal<T> {
-  RxText<T> textWidget(String Function(T value) text) => RxText<T>(this, text);
+  Widget rxText(String Function(T value) text) => map(text).rxText();
 }
 
 extension RxValStringWidgetX on RxVal<String> {
-  RxText<String> toTextWidget() => textWidget((value) => value);
+  Widget rxText() => RxText(this);
 }
-
-
 
 extension WidgetX on Widget {
   Widget when(RxVal<bool> condition) => RxBuilder(
@@ -66,28 +61,100 @@ extension WidgetX on Widget {
       );
 }
 
-
-
 extension NullableRxValWidgetX<T extends Object> on RxVal<T?> {
-  Widget loadingOr(Widget Function(BuildContext context, T value) builder) => RxBuilder(
-    stream: this,
-    builder: (context, value) {
-      if (value == null) {
-        return const LoadingWidget();
-      } else {
-        return builder(context, value);
-      }
-    },
-  );
+  Widget loadingOr(Widget Function(BuildContext context, T value) builder) =>
+      RxBuilder(
+        stream: this,
+        builder: (context, value) {
+          if (value == null) {
+            return const LoadingWidget();
+          } else {
+            return builder(context, value);
+          }
+        },
+      );
 
-  Widget nullOr(Widget Function(BuildContext context, T value) builder) => RxBuilder(
-    stream: this,
-    builder: (context, value) {
-      if (value == null) {
-        return const NullWidget();
-      } else {
-        return builder(context, value);
-      }
-    },
-  );
+  Widget nullOr(Widget Function(BuildContext context, T value) builder) =>
+      RxBuilder(
+        stream: this,
+        builder: (context, value) {
+          if (value == null) {
+            return const NullWidget();
+          } else {
+            return builder(context, value);
+          }
+        },
+      );
+}
+
+class RxList<T, I extends Iterable<T>> extends StatelessWidget {
+  final RxVal<I> list;
+  final ValueBuilder<T> builder;
+
+  const RxList({Key? key, required this.list, required this.builder})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return RxBuilder(
+      stream: list,
+      builder: (context, items) {
+        return ListView(
+          children: items
+              .map(
+                (item) => builder(context, item),
+              )
+              .toList(),
+        );
+      },
+    );
+  }
+}
+
+class RxColumn<T, I extends Iterable<T>> extends StatelessWidget {
+  final RxVal<I> list;
+  final ValueBuilder<T> builder;
+
+  const RxColumn({Key? key, required this.list, required this.builder})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return RxBuilder(
+      stream: list,
+      builder: (context, items) {
+        return Column(
+          children: items
+              .map(
+                (item) => builder(context, item),
+          )
+              .toList(),
+        );
+      },
+    );
+  }
+}
+
+
+// extension IterableRxValX<T, I extends Iterable<T>> on RxVal<I> {
+//   RxList<T, I> rxList(ValueBuilder<T> builder) =>
+//       RxList(list: this, builder: builder);
+// }
+
+extension BuiltListRxValX<T> on RxVal<BuiltList<T>> {
+  RxList<T, BuiltList<T>> rxList(ValueBuilder<T> builder) =>
+      RxList(list: this, builder: builder);
+
+  RxColumn<T, BuiltList<T>> rxColumn(ValueBuilder<T> builder) =>
+      RxColumn(list: this, builder: builder);
+}
+
+
+extension WidgetRxValX<T> on RxVal<T> {
+  RxBuilder<T> rxWidget(ValueBuilder<T> builder) =>
+      RxBuilder(stream: this, builder: builder);
+}
+
+extension StateTypeRxValX<T> on RxVal<StateType> {
+  Widget rxState() => rxWidget((context, value) => StateWidget(state: value));
 }
