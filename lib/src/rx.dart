@@ -27,7 +27,7 @@ class RxBuilder<T> extends StatelessWidget {
 class RxText<T> extends StatelessWidget {
   final RxVal<String> _stream;
 
-  const RxText(this._stream,  {super.key});
+  const RxText(this._stream, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +46,13 @@ extension RxValWidgetX<T> on RxVal<T> {
 
 extension RxValStringWidgetX on RxVal<String> {
   Widget rxText() => RxText(this);
+}
+
+extension StreamStringWidgetX on Stream<String> {
+  Widget rxText([String initial = ""]) => rxWidget(
+        initial,
+        (context, value) => Text(value),
+      );
 }
 
 extension WidgetX on Widget {
@@ -127,14 +134,13 @@ class RxColumn<T, I extends Iterable<T>> extends StatelessWidget {
           children: items
               .map(
                 (item) => builder(context, item),
-          )
+              )
               .toList(),
         );
       },
     );
   }
 }
-
 
 // extension IterableRxValX<T, I extends Iterable<T>> on RxVal<I> {
 //   RxList<T, I> rxList(ValueBuilder<T> builder) =>
@@ -149,7 +155,6 @@ extension BuiltListRxValX<T> on RxVal<BuiltList<T>> {
       RxColumn(list: this, builder: builder);
 }
 
-
 extension WidgetRxValX<T> on RxVal<T> {
   RxBuilder<T> rxWidget(ValueBuilder<T> builder) =>
       RxBuilder(stream: this, builder: builder);
@@ -157,4 +162,29 @@ extension WidgetRxValX<T> on RxVal<T> {
 
 extension StateTypeRxValX<T> on RxVal<StateType> {
   Widget rxState() => rxWidget((context, value) => StateWidget(state: value));
+}
+
+extension WidgetStreamX<T> on Stream<T> {
+  Widget rxWidget(T initial, ValueBuilder<T> builder) => StreamBuilder(
+        initialData: initial,
+        stream: this,
+        builder: (context, snapshot) {
+          return builder(context, snapshot.data as T);
+        },
+      );
+}
+
+extension BuiltListStreamlX<T> on Stream<BuiltList<T>> {
+  Widget rxColumn(ValueBuilder<T> builder) => rxWidget(
+        BuiltList(),
+        (context, items) {
+          return Column(
+            children: items
+                .map(
+                  (item) => builder(context, item),
+                )
+                .toList(),
+          );
+        },
+      );
 }
