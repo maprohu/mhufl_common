@@ -131,6 +131,7 @@ class RxColumn<T, I extends Iterable<T>> extends StatelessWidget {
       stream: list,
       builder: (context, items) {
         return Column(
+          mainAxisSize: MainAxisSize.min,
           children: items
               .map(
                 (item) => builder(context, item),
