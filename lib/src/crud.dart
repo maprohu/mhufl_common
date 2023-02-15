@@ -70,6 +70,14 @@ class StringViewProperty extends StatelessWidget {
       edit: editor.show,
     );
   }
+
+  static StringViewProperty scalar(
+    RxProtoScalar<String> prop,
+  ) =>
+      rx(
+        label: prop.name.camelCaseToLabel,
+        rx: prop.orEmptyVar(),
+      );
 }
 
 class StringDialogEditor {
