@@ -6,3 +6,5 @@ export 'src/rx.dart';
 export 'src/controller.dart';
 export 'src/config.dart';
 export 'src/layout.dart';
+export 'src/dialog.dart';
+export 'src/crud.dart';

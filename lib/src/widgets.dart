@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mhudart_common/mhdart_common.dart';
+import 'package:mhufl_common/mhufl_common.dart';
 
 typedef ValueBuilder<T> = Widget Function(BuildContext context, T value);
 
@@ -105,6 +106,22 @@ class ActionsBar extends StatelessWidget {
   }
 }
 
+class ActionButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+
+  const ActionButton({Key? key, required this.label, this.onPressed})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      child: Text(label),
+    ).withPadding();
+  }
+}
+
 class BusyWidget extends StatelessWidget {
   const BusyWidget({Key? key}) : super(key: key);
 
@@ -143,4 +160,36 @@ class StateWidget<T> extends StatelessWidget {
         return const BusyWidget();
     }
   }
+}
+
+class IconWidget extends StatelessWidget {
+  final IconData icon;
+  final Color? color;
+
+  const IconWidget(this.icon, {Key? key, this.color}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(
+      icon,
+      color: color,
+      size: 24.0,
+    );
+  }
+}
+
+class WidgetWithKey extends StatelessWidget {
+  final Widget child;
+  WidgetWithKey(dynamic key, this.child) : super(key: ValueKey(key));
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
+  }
+}
+
+
+extension MhuWidgetX on Widget {
+  Widget withKey(dynamic key) => WidgetWithKey(key, this);
+
 }

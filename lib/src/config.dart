@@ -11,8 +11,6 @@ Future<void> startPersistingSharedPreferences<T>(
   T Function(String json) fromJson,
   String Function(T object) toJson,
 ) async {
-  await rxVar.disposeBy(disposers);
-
   final prefs = await SharedPreferences.getInstance();
 
   final configString = prefs.getString(keyName);
@@ -24,13 +22,20 @@ Future<void> startPersistingSharedPreferences<T>(
     }
   }
 
-  rxVar.stream
-      .skip(1)
-      .asyncForEach(
-        (value) => prefs.setString(
-          keyName,
-          toJson(value),
-        ),
-      )
-      .awaitBy(disposers);
+  final processing = rxVar.stream.skip(1).asyncForEach(
+    (value) {
+      final jsonString = toJson(value);
+      log.d(() => value);
+      return prefs.setString(
+        keyName,
+        jsonString,
+      );
+    },
+  );
+
+  await disposers.add(() async {
+    log.i("waiting for config variable closing...");
+    await processing;
+    log.i("config variable closed.");
+  });
 }

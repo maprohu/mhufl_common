@@ -94,6 +94,23 @@ extension NullableRxValWidgetX<T extends Object> on RxVal<T?> {
       );
 }
 
+extension WidgetRxValWidgetX<T> on RxVal<Widget> {
+  Widget rxWidget() => RxBuilder(
+        stream: this,
+        builder: (context, value) => value,
+      );
+}
+
+extension OptWidgetRxValWidgetX<T> on RxVal<Opt<Widget>> {
+  Widget rxWidget() => RxBuilder(
+        stream: this,
+        builder: (context, value) => value.apply(
+          here: Functions.identity,
+          gone: () => const NullWidget(),
+        ),
+      );
+}
+
 class RxList<T, I extends Iterable<T>> extends StatelessWidget {
   final RxVal<I> list;
   final ValueBuilder<T> builder;
@@ -157,12 +174,35 @@ extension BuiltListRxValX<T> on RxVal<BuiltList<T>> {
 }
 
 extension WidgetRxValX<T> on RxVal<T> {
-  RxBuilder<T> rxWidget(ValueBuilder<T> builder) =>
+  RxBuilder<T> rxBuilder(ValueBuilder<T> builder) =>
       RxBuilder(stream: this, builder: builder);
 }
 
+extension WidgetOptRxValX<T> on RxVal<Opt<T>> {
+  Widget rxBuilderOrNull(ValueBuilder<T> builder) => rxBuilder(
+        (context, value) => value.apply(
+          here: (v) => builder(context, v),
+          gone: const NullWidget().asConstant(),
+        ),
+      );
+}
+
+extension WidgetBoolRxValX on RxVal<bool> {
+  Widget rxWhen(Widget child) => map((value) {
+        if (value) {
+          return child;
+        } else {
+          return const NullWidget();
+        }
+      }).rxWidget();
+
+  RxVal<bool> not() => map((b) => !b);
+
+  Widget rxWhenNot(Widget child) => not().rxWhen(child);
+}
+
 extension StateTypeRxValX<T> on RxVal<StateType> {
-  Widget rxState() => rxWidget((context, value) => StateWidget(state: value));
+  Widget rxState() => map((value) => StateWidget(state: value)).rxWidget();
 }
 
 extension WidgetStreamX<T> on Stream<T> {
