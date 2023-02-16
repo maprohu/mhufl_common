@@ -100,3 +100,21 @@ class StringDialogEditor {
     required this.setter,
   });
 }
+
+
+extension RxProtoScalarBoolX on RxProtoScalar<bool> {
+  Widget boolEditor() {
+    return ListTile(
+      key: ValueKey(name),
+      title: Text(name.camelCaseToLabel),
+      trailing: orDefault(false).rxBuilder(
+            (context, value) => Switch(
+          value: value,
+          onChanged: (bool value) {
+            this.value = value.here();
+          },
+        ),
+      ),
+    );
+  }
+}
