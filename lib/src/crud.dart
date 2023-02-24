@@ -1,8 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kt_dart/kt.dart';
 import 'package:mhudart_common/mhdart_common.dart';
 import 'package:mhufl_common/mhufl_common.dart';
+
+part 'crud.g.dart';
 
 class ShowDetails {
   final String title;
@@ -61,7 +62,7 @@ class StringViewProperty extends StatelessWidget {
   }) {
     final editor = StringDialogEditor(
       title: label,
-      setter: rx.setter,
+      setter: rx.set,
     );
 
     return StringViewProperty(
@@ -101,14 +102,13 @@ class StringDialogEditor {
   });
 }
 
-
 extension RxProtoScalarBoolX on RxProtoScalar<bool> {
   Widget boolEditor() {
     return ListTile(
       key: ValueKey(name),
       title: Text(name.camelCaseToLabel),
       trailing: orDefault(false).rxBuilder(
-            (context, value) => Switch(
+        (context, value) => Switch(
           value: value,
           onChanged: (bool value) {
             this.value = value.here();
@@ -118,3 +118,79 @@ extension RxProtoScalarBoolX on RxProtoScalar<bool> {
     );
   }
 }
+
+class Crud<L extends PmLib> {
+  final L lib;
+
+  Crud(this.lib);
+
+  late final root = mk.PdRoot(
+    descriptorSet: FileDescriptorSet.fromJson(lib.descriptor).asConstant(),
+    msgPayload: (msg) =>
+        mk.CrdMsg.create(crud: asConstant(), msg: msg.asConstant()),
+    fldPayload: (fld) => mk.CrdFld(crud: asConstant(), fld: fld.asConstant()),
+    enumPayload: (enm) => mk.CrdEnum(crud: asConstant(), enm: enm.asConstant()),
+  );
+
+  late final resolveMessage = Cache(
+      (PmTypedMessage<dynamic, L, dynamic> message) =>
+          root.resolveMessageIndex(message.path$).payload);
+
+  late final resolveField = Cache(
+      (PmTypedField<dynamic, dynamic, L, dynamic> field) =>
+          resolveMessage(field.message).msg.fields[field.index].payload);
+
+// Widget crudButton<T, V, M extends PmMessage<L>,
+//     F extends PmTypedField<T, V, L, M>>(PrxValue<V, F, L, M> value) {
+//   return Builder(builder: (context) {
+//     return ListTile(
+//       title: Text(info.name.camelCaseToLabel),
+//       subtitle: val
+//           .getMapField(info)
+//           .mapOpt((m) => m.length)
+//           .orDefault(0)
+//           .map(
+//             (v) => v.toString(),
+//       )
+//           .rxText(),
+//       onTap: () {
+//         ScaffoldPage.show(
+//           context,
+//           info.name.camelCaseToLabel,
+//           protoMapCrudPage(
+//             val,
+//             info,
+//             rebuild,
+//             Navigator.pop,
+//           ),
+//         );
+//       },
+//     );
+//   });
+//
+// }
+}
+
+abstract class CrdItem<L extends PmLib> {
+  Crud<L> get crud;
+}
+
+@Impl()
+abstract class CrdMsg<L extends PmLib> extends CrdItem<L>
+    implements HasPdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> {
+  late final path = msg.path.toList(growable: false);
+  late final PmTypedMessage<dynamic, L, dynamic> pmMsg = msg.messageLevel.when(
+    top: (r) => crud.lib.messages[msg.index],
+    nested: (p) => p.payload.pmMsg.nestedMessages$[msg.index],
+  ) as PmTypedMessage<dynamic, L, dynamic>;
+}
+
+@Impl()
+abstract class CrdFld<L extends PmLib> extends CrdItem<L>
+    implements HasPdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> {
+  late final PmTypedField<dynamic, dynamic, L, dynamic> pmFld;
+}
+
+@Impl()
+abstract class CrdEnum<L extends PmLib> extends CrdItem<L>
+    implements HasPdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> {}
