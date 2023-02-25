@@ -73,7 +73,7 @@ class StringViewProperty extends StatelessWidget {
   }
 
   static StringViewProperty scalar(
-    RxProtoScalar<String> prop,
+    CrxSingleField<String> prop,
   ) =>
       rx(
         label: prop.name.camelCaseToLabel,
@@ -102,29 +102,12 @@ class StringDialogEditor {
   });
 }
 
-extension RxProtoScalarBoolX on RxProtoScalar<bool> {
-  Widget boolEditor() {
-    return ListTile(
-      key: ValueKey(name),
-      title: Text(name.camelCaseToLabel),
-      trailing: orDefault(false).rxBuilder(
-        (context, value) => Switch(
-          value: value,
-          onChanged: (bool value) {
-            this.value = value.here();
-          },
-        ),
-      ),
-    );
-  }
-}
-
 class Crud<L extends PmLib> {
   final L lib;
 
   Crud(this.lib);
 
-  late final root = mk.PdRoot(
+  late final root = mk.PdRoot.create<CrdMsg<L>, CrdFld<L>, CrdEnum<L>>(
     descriptorSet: FileDescriptorSet.fromJson(lib.descriptor).asConstant(),
     msgPayload: (msg) =>
         mk.CrdMsg.create(crud: asConstant(), msg: msg.asConstant()),
@@ -132,43 +115,23 @@ class Crud<L extends PmLib> {
     enumPayload: (enm) => mk.CrdEnum(crud: asConstant(), enm: enm.asConstant()),
   );
 
-  late final resolveMessage = Cache(
-      (PmTypedMessage<dynamic, L, dynamic> message) =>
-          root.resolveMessageIndex(message.path$).payload);
+  late final resolveMessage = Cache((PmMessage<L> message) =>
+      root.resolveMessageIndex(message.path$).payload);
 
-  late final resolveField = Cache(
-      (PmTypedField<dynamic, dynamic, L, dynamic> field) =>
-          resolveMessage(field.message).msg.fields[field.index].payload);
+  late final resolveField = Cache((PmFieldOfLib<L> field) =>
+      resolveMessage(field.message).msg.fields[field.index].payload);
 
-// Widget crudButton<T, V, M extends PmMessage<L>,
-//     F extends PmTypedField<T, V, L, M>>(PrxValue<V, F, L, M> value) {
-//   return Builder(builder: (context) {
-//     return ListTile(
-//       title: Text(info.name.camelCaseToLabel),
-//       subtitle: val
-//           .getMapField(info)
-//           .mapOpt((m) => m.length)
-//           .orDefault(0)
-//           .map(
-//             (v) => v.toString(),
-//       )
-//           .rxText(),
-//       onTap: () {
-//         ScaffoldPage.show(
-//           context,
-//           info.name.camelCaseToLabel,
-//           protoMapCrudPage(
-//             val,
-//             info,
-//             rebuild,
-//             Navigator.pop,
-//           ),
-//         );
-//       },
-//     );
-//   });
-//
-// }
+  CrxSingleField<T> crxSingle<T>(PrxSingleOfType<T, L> prx) =>
+      mk.CrxSingleField.fromPrxSingleBase(
+        prxSingleBase: prx,
+        crd: resolveField.get(prx.field()).asConstant(),
+      );
+
+  CrxCollectionField<T> crxCollection<T>(PrxCollectionOfType<T, L> prx) =>
+      mk.CrxCollectionField.fromPrxCollectionBase(
+        prxCollectionBase: prx,
+        crd: resolveField.get(prx.field()).asConstant(),
+      );
 }
 
 abstract class CrdItem<L extends PmLib> {
@@ -179,18 +142,63 @@ abstract class CrdItem<L extends PmLib> {
 abstract class CrdMsg<L extends PmLib> extends CrdItem<L>
     implements HasPdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> {
   late final path = msg.path.toList(growable: false);
-  late final PmTypedMessage<dynamic, L, dynamic> pmMsg = msg.messageLevel.when(
+  late final PmMessage<L> pmMsg = msg.messageLevel.when(
     top: (r) => crud.lib.messages[msg.index],
     nested: (p) => p.payload.pmMsg.nestedMessages$[msg.index],
-  ) as PmTypedMessage<dynamic, L, dynamic>;
+  ) as PmMessage<L>;
 }
 
 @Impl()
 abstract class CrdFld<L extends PmLib> extends CrdItem<L>
     implements HasPdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> {
   late final PmTypedField<dynamic, dynamic, L, dynamic> pmFld;
+  late final name = fld.name;
+  late final label = name.camelCaseToLabel;
+
+  Widget crudTileSingle(PrxSingleBase prx) {
+    return fld.cardinality.when(
+      single: () => fld.valueType.when(boolType: () {
+        prx as PrxSingleBase<bool>;
+        return prx.crudSwitch(label);
+      }),
+    );
+  }
+
+  Widget crudTileCollection(PrxCollectionBase prx) => throw prx; // TODO
 }
 
 @Impl()
 abstract class CrdEnum<L extends PmLib> extends CrdItem<L>
     implements HasPdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> {}
+
+abstract class CrxField<T> implements RxValOpt<T> {
+  CrdFld get crd;
+
+  Widget crudTile();
+}
+
+@Impl([PrxCollectionBase])
+abstract class CrxCollectionField<T>
+    implements CrxField<T>, PrxCollectionBase<T> {
+  @override
+  Widget crudTile() => crd.crudTileCollection(this);
+}
+
+@Impl([PrxSingleBase])
+abstract class CrxSingleField<T> implements CrxField<T>, PrxSingleBase<T> {
+  @override
+  Widget crudTile() => crd.crudTileSingle(this);
+}
+
+extension CrxFieldX<T> on CrxField<T> {
+  String get name => crd.name;
+}
+
+extension CrxFieldStringX on CrxSingleField<String> {
+  Widget stringView() => StringViewProperty.scalar(this);
+}
+
+extension CrxSingleFieldBoolX on CrxSingleField<bool> {
+  CrudSwitch crudSwitch() =>
+      orDefaultVar(false).crudSwitch(name.camelCaseToLabel);
+}
