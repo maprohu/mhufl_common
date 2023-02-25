@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mhudart_common/mhdart_common.dart';
 import '../rx.dart';
-
+part 'crud_widgets.g.dart';
 class CrudSwitch extends StatelessWidget {
   final RxVar<bool> rxVar;
   final String label;
@@ -34,17 +34,15 @@ extension RxVarOptBoolXCrudSwitch on RxVar<Opt<bool>> {
   CrudSwitch crudSwitch(String label) => orDefaultVar(false).crudSwitch(label);
 }
 
-class CrudButton extends StatelessWidget {
-  final String label;
-  final RxVar<String> subtitle;
-  final RxVar<VoidCallback?> onTap;
+@Impl()
+abstract class CrudButton extends StatelessWidget {
+  String get label;
 
-  const CrudButton({
-    Key? key,
-    required this.label,
-    required this.subtitle,
-    required this.onTap,
-  }) : super(key: key);
+  RxVar<String> get subtitle;
+
+  RxVar<VoidCallback?> get onTap;
+
+  const CrudButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -148,6 +148,11 @@ abstract class CrdMsg<L extends PmLib> extends CrdItem<L>
   ) as PmMessage<L>;
 }
 
+@Impl([PrxCollectionBase, PrxSingleBase])
+abstract class Modifier<T> implements PrxCollectionBase<T>, PrxSingleBase<T> {}
+
+extension ModifierX<T> on Modifier<T> {}
+
 @Impl()
 abstract class CrdFld<L extends PmLib> extends CrdItem<L>
     implements HasPdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> {
@@ -155,16 +160,35 @@ abstract class CrdFld<L extends PmLib> extends CrdItem<L>
   late final name = fld.name;
   late final label = name.camelCaseToLabel;
 
-  Widget crudTileSingle(PrxSingleBase prx) {
+  Widget crudTile<T>(Modifier<T> prx) {
     return fld.cardinality.when(
       single: () => fld.valueType.when(boolType: () {
-        prx as PrxSingleBase<bool>;
-        return prx.crudSwitch(label);
+        return CrudSwitch(
+          rxVar: prx.castVar<Opt<bool>>().orDefaultVar(false),
+          label: label,
+        );
       }),
+      mapOf: (mapOf) => mk.CrudButton.data(
+        label: label,
+        subtitle: mk.RxVar.variable('0'),
+        onTap: mk.RxVar.variable(null),
+      ),
     );
   }
 
-  Widget crudTileCollection(PrxCollectionBase prx) => throw prx; // TODO
+  Widget crudTileSingle(PrxSingleBase prx) => crudTile(
+        mk.Modifier.fromPrxSingleBase(
+          prxSingleBase: prx,
+          rebuild: Functions.throws1,
+        ),
+      );
+
+  Widget crudTileCollection(PrxCollectionBase prx) => crudTile(
+        mk.Modifier.fromPrxCollectionBase<dynamic>(
+          prxCollectionBase: prx,
+          set: Functions.throws1,
+        ),
+      );
 }
 
 @Impl()
