@@ -104,7 +104,7 @@ extension WidgetRxValWidgetX<T> on RxVal<Widget> {
 extension OptWidgetRxValWidgetX<T> on RxVal<Opt<Widget>> {
   Widget rxWidget() => RxBuilder(
         stream: this,
-        builder: (context, value) => value.apply(
+        builder: (context, value) => value.when(
           here: Functions.identity,
           gone: () => const NullWidget(),
         ),
@@ -180,7 +180,7 @@ extension WidgetRxValX<T> on RxVal<T> {
 
 extension WidgetOptRxValX<T> on RxVal<Opt<T>> {
   Widget rxBuilderOrNull(ValueBuilder<T> builder) => rxBuilder(
-        (context, value) => value.apply(
+        (context, value) => value.when(
           here: (v) => builder(context, v),
           gone: const NullWidget().asConstant(),
         ),

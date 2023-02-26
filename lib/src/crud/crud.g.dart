@@ -6,7 +6,7 @@ part of 'crud.dart';
 // ImplGenerator
 // **************************************************************************
 
-class CrdMsg$Data<L extends PmLib<dynamic>> {
+class CrdMsg$Data<L extends PmLib<L>> {
   final Crud<L> Function() crud;
   final PdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() msg;
   CrdMsg$Data({
@@ -15,14 +15,14 @@ class CrdMsg$Data<L extends PmLib<dynamic>> {
   });
 }
 
-class CrdMsg$Impl<L extends PmLib<dynamic>> extends CrdMsg<L> {
+class CrdMsg$Impl<L extends PmLib<L>> extends CrdMsg<L> {
   final CrdMsg$Data<L> _data;
   CrdMsg$Impl(this._data);
   Crud<L> get crud => _data.crud();
   PdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> get msg => _data.msg();
 }
 
-class CrdMsg$Delegate<L extends PmLib<dynamic>> extends CrdMsg<L> {
+class CrdMsg$Delegate<L extends PmLib<L>> extends CrdMsg<L> {
   final CrdMsg<L> Function() _delegate;
   CrdMsg$Delegate(this._delegate);
   Crud<L> get crud => _delegate().crud;
@@ -31,7 +31,7 @@ class CrdMsg$Delegate<L extends PmLib<dynamic>> extends CrdMsg<L> {
 
 class CrdMsg$Factory {
   const CrdMsg$Factory();
-  CrdMsg<L> call<L extends PmLib<dynamic>>({
+  CrdMsg<L> call<L extends PmLib<L>>({
     required Crud<L> Function() crud,
     required PdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() msg,
   }) =>
@@ -41,7 +41,7 @@ class CrdMsg$Factory {
           msg: msg,
         ),
       );
-  CrdMsg<L> create<L extends PmLib<dynamic>>({
+  CrdMsg<L> create<L extends PmLib<L>>({
     required Crud<L> Function() crud,
     required PdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() msg,
   }) =>
@@ -51,7 +51,7 @@ class CrdMsg$Factory {
           msg: msg,
         ),
       );
-  CrdMsg<L> data<L extends PmLib<dynamic>>({
+  CrdMsg<L> data<L extends PmLib<L>>({
     required Crud<L> crud,
     required PdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> msg,
   }) =>
@@ -61,7 +61,7 @@ class CrdMsg$Factory {
           msg: msg.asConstant(),
         ),
       );
-  CrdMsg<L> delegate<L extends PmLib<dynamic>>(
+  CrdMsg<L> delegate<L extends PmLib<L>>(
     CrdMsg<L> Function() delegate,
   ) =>
       CrdMsg$Delegate(
@@ -75,116 +75,7 @@ extension CrdMsg$Ext$Mk on Mk {
   CrdMsg$Factory get CrdMsg => crdMsg$Factory;
 }
 
-class Modifier$Data<T> {
-  final void Function(Opt<T> value) set;
-  final Opt<T> Function() get;
-  final Stream<Opt<T>> Function() changes;
-  final void Function(void Function(T) updates) rebuild;
-  Modifier$Data({
-    required this.set,
-    required this.get,
-    required this.changes,
-    required this.rebuild,
-  });
-}
-
-class Modifier$Impl<T> extends Modifier<T> {
-  final Modifier$Data<T> _data;
-  Modifier$Impl(this._data);
-  void set(Opt<T> value) => _data.set(value);
-  Opt<T> get() => _data.get();
-  Stream<Opt<T>> changes() => _data.changes();
-  void rebuild(void Function(T) updates) => _data.rebuild(updates);
-}
-
-class Modifier$Delegate<T> extends Modifier<T> {
-  final Modifier<T> Function() _delegate;
-  Modifier$Delegate(this._delegate);
-  void set(Opt<T> value) => _delegate().set(value);
-  Opt<T> get() => _delegate().get();
-  Stream<Opt<T>> changes() => _delegate().changes();
-  void rebuild(void Function(T) updates) => _delegate().rebuild(updates);
-}
-
-class Modifier$Factory {
-  const Modifier$Factory();
-  Modifier<T> call<T>({
-    required void Function(Opt<T> value) set,
-    required Opt<T> Function() get,
-    required Stream<Opt<T>> Function() changes,
-    required void Function(void Function(T) updates) rebuild,
-  }) =>
-      Modifier$Impl(
-        Modifier$Data(
-          set: set,
-          get: get,
-          changes: changes,
-          rebuild: rebuild,
-        ),
-      );
-  Modifier<T> create<T>({
-    required void Function(Opt<T> value) set,
-    required Opt<T> Function() get,
-    required Stream<Opt<T>> Function() changes,
-    required void Function(void Function(T) updates) rebuild,
-  }) =>
-      Modifier$Impl(
-        Modifier$Data(
-          set: set,
-          get: get,
-          changes: changes,
-          rebuild: rebuild,
-        ),
-      );
-  Modifier<T> data<T>({
-    required void Function(Opt<T> value) set,
-    required Opt<T> Function() get,
-    required Stream<Opt<T>> Function() changes,
-    required void Function(void Function(T) updates) rebuild,
-  }) =>
-      Modifier$Impl(
-        Modifier$Data(
-          set: set,
-          get: get,
-          changes: changes,
-          rebuild: rebuild,
-        ),
-      );
-  Modifier<T> delegate<T>(
-    Modifier<T> Function() delegate,
-  ) =>
-      Modifier$Delegate(
-        delegate,
-      );
-  Modifier<T> fromPrxCollectionBase<T>({
-    required PrxCollectionBase<T> prxCollectionBase,
-    required void Function(Opt<T> value) set,
-  }) =>
-      create(
-        get: prxCollectionBase.get,
-        changes: prxCollectionBase.changes,
-        rebuild: prxCollectionBase.rebuild,
-        set: set,
-      );
-  Modifier<T> fromPrxSingleBase<T>({
-    required PrxSingleBase<T> prxSingleBase,
-    required void Function(void Function(T) updates) rebuild,
-  }) =>
-      create(
-        set: prxSingleBase.set,
-        get: prxSingleBase.get,
-        changes: prxSingleBase.changes,
-        rebuild: rebuild,
-      );
-}
-
-const modifier$Factory = Modifier$Factory();
-
-extension Modifier$Ext$Mk on Mk {
-  Modifier$Factory get Modifier => modifier$Factory;
-}
-
-class CrdFld$Data<L extends PmLib<dynamic>> {
+class CrdFld$Data<L extends PmLib<L>> {
   final Crud<L> Function() crud;
   final PdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() fld;
   CrdFld$Data({
@@ -193,14 +84,14 @@ class CrdFld$Data<L extends PmLib<dynamic>> {
   });
 }
 
-class CrdFld$Impl<L extends PmLib<dynamic>> extends CrdFld<L> {
+class CrdFld$Impl<L extends PmLib<L>> extends CrdFld<L> {
   final CrdFld$Data<L> _data;
   CrdFld$Impl(this._data);
   Crud<L> get crud => _data.crud();
   PdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> get fld => _data.fld();
 }
 
-class CrdFld$Delegate<L extends PmLib<dynamic>> extends CrdFld<L> {
+class CrdFld$Delegate<L extends PmLib<L>> extends CrdFld<L> {
   final CrdFld<L> Function() _delegate;
   CrdFld$Delegate(this._delegate);
   Crud<L> get crud => _delegate().crud;
@@ -209,7 +100,7 @@ class CrdFld$Delegate<L extends PmLib<dynamic>> extends CrdFld<L> {
 
 class CrdFld$Factory {
   const CrdFld$Factory();
-  CrdFld<L> call<L extends PmLib<dynamic>>({
+  CrdFld<L> call<L extends PmLib<L>>({
     required Crud<L> Function() crud,
     required PdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() fld,
   }) =>
@@ -219,7 +110,7 @@ class CrdFld$Factory {
           fld: fld,
         ),
       );
-  CrdFld<L> create<L extends PmLib<dynamic>>({
+  CrdFld<L> create<L extends PmLib<L>>({
     required Crud<L> Function() crud,
     required PdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() fld,
   }) =>
@@ -229,7 +120,7 @@ class CrdFld$Factory {
           fld: fld,
         ),
       );
-  CrdFld<L> data<L extends PmLib<dynamic>>({
+  CrdFld<L> data<L extends PmLib<L>>({
     required Crud<L> crud,
     required PdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> fld,
   }) =>
@@ -239,7 +130,7 @@ class CrdFld$Factory {
           fld: fld.asConstant(),
         ),
       );
-  CrdFld<L> delegate<L extends PmLib<dynamic>>(
+  CrdFld<L> delegate<L extends PmLib<L>>(
     CrdFld<L> Function() delegate,
   ) =>
       CrdFld$Delegate(
@@ -253,7 +144,7 @@ extension CrdFld$Ext$Mk on Mk {
   CrdFld$Factory get CrdFld => crdFld$Factory;
 }
 
-class CrdEnum$Data<L extends PmLib<dynamic>> {
+class CrdEnum$Data<L extends PmLib<L>> {
   final Crud<L> Function() crud;
   final PdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() enm;
   CrdEnum$Data({
@@ -262,14 +153,14 @@ class CrdEnum$Data<L extends PmLib<dynamic>> {
   });
 }
 
-class CrdEnum$Impl<L extends PmLib<dynamic>> extends CrdEnum<L> {
+class CrdEnum$Impl<L extends PmLib<L>> extends CrdEnum<L> {
   final CrdEnum$Data<L> _data;
   CrdEnum$Impl(this._data);
   Crud<L> get crud => _data.crud();
   PdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> get enm => _data.enm();
 }
 
-class CrdEnum$Delegate<L extends PmLib<dynamic>> extends CrdEnum<L> {
+class CrdEnum$Delegate<L extends PmLib<L>> extends CrdEnum<L> {
   final CrdEnum<L> Function() _delegate;
   CrdEnum$Delegate(this._delegate);
   Crud<L> get crud => _delegate().crud;
@@ -278,7 +169,7 @@ class CrdEnum$Delegate<L extends PmLib<dynamic>> extends CrdEnum<L> {
 
 class CrdEnum$Factory {
   const CrdEnum$Factory();
-  CrdEnum<L> call<L extends PmLib<dynamic>>({
+  CrdEnum<L> call<L extends PmLib<L>>({
     required Crud<L> Function() crud,
     required PdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() enm,
   }) =>
@@ -288,7 +179,7 @@ class CrdEnum$Factory {
           enm: enm,
         ),
       );
-  CrdEnum<L> create<L extends PmLib<dynamic>>({
+  CrdEnum<L> create<L extends PmLib<L>>({
     required Crud<L> Function() crud,
     required PdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() enm,
   }) =>
@@ -298,7 +189,7 @@ class CrdEnum$Factory {
           enm: enm,
         ),
       );
-  CrdEnum<L> data<L extends PmLib<dynamic>>({
+  CrdEnum<L> data<L extends PmLib<L>>({
     required Crud<L> crud,
     required PdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> enm,
   }) =>
@@ -308,7 +199,7 @@ class CrdEnum$Factory {
           enm: enm.asConstant(),
         ),
       );
-  CrdEnum<L> delegate<L extends PmLib<dynamic>>(
+  CrdEnum<L> delegate<L extends PmLib<L>>(
     CrdEnum<L> Function() delegate,
   ) =>
       CrdEnum$Delegate(
