@@ -24,6 +24,8 @@ dependencies:
   kt_dart: ^1.0.0
   path: ^1.8.2
   collection: ^1.17.0
+  select_dialog: ^2.0.0
+  fast_immutable_collections: any
 
 dev_dependencies:
   flutter_test:

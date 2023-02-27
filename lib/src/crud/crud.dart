@@ -1,9 +1,11 @@
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
 import 'package:kt_dart/kt.dart';
 import 'package:mhudart_common/mhdart_common.dart';
 import 'package:mhufl_common/mhufl_common.dart';
 import 'package:mhufl_common/src/crud/crud_control.dart';
 import 'package:protobuf/protobuf.dart';
+import 'package:select_dialog/select_dialog.dart';
 
 part 'crud.g.dart';
 
@@ -104,12 +106,24 @@ class StringDialogEditor {
   });
 }
 
-class Crud<L extends PmLib<L>> {
-  final L lib;
+class TileDefaults {}
 
-  Crud(this.lib);
+typedef CrudFieldTileCustomizer = Widget Function<T>(
+    CrdFld fld, PrxBase<T> prx, TileDefaults defaults);
 
-  late final root = mk.PdRoot.create<CrdMsg<L>, CrdFld<L>, CrdEnum<L>>(
+typedef CrudFieldTileOverrides = CrudFieldTileCustomizer? Function(
+    FieldIndex index);
+
+class Crud {
+  final PmLib lib;
+  final CrudFieldTileOverrides? tileOverrides;
+
+  Crud(
+    this.lib, {
+    this.tileOverrides,
+  });
+
+  late final root = mk.PdRoot.create<CrdMsg, CrdFld, CrdEnum>(
     descriptorSet: FileDescriptorSet.fromJson(lib.descriptor).asConstant(),
     msgPayload: (msg) =>
         mk.CrdMsg.create(crud: asConstant(), msg: msg.asConstant()),
@@ -117,66 +131,116 @@ class Crud<L extends PmLib<L>> {
     enumPayload: (enm) => mk.CrdEnum(crud: asConstant(), enm: enm.asConstant()),
   );
 
-  late final resolveMessage = Cache((HasMessagePath<L> message) =>
+  late final resolveMessage = Cache((HasMessagePath message) =>
       root.resolveMessageIndex(message.path$).payload);
 
-  late final resolveField = Cache((HasFieldPath<L> field) =>
+  late final resolveField = Cache((HasFieldPath field) =>
       resolveMessage(field.message).msg.fields[field.index].payload);
 
-  CrxSingleField<T> crxSingle<T>(PrxSingleOfType<T, L> prx) =>
+  CrxSingleField<T> crxSingle<T>(PrxSingleOfType<T, dynamic> prx) =>
       mk.CrxSingleField.fromPrxSingleBase(
         prxSingleBase: prx,
         crd: resolveField.get(prx.field()).asConstant(),
       );
 
-  CrxCollectionField<T> crxCollection<T>(PrxCollectionOfType<T, L> prx) =>
+  CrxCollectionField<T> crxCollection<T>(PrxCollectionOfType<T, dynamic> prx) =>
       mk.CrxCollectionField.fromPrxCollectionBase(
         prxCollectionBase: prx,
         crd: resolveField.get(prx.field()).asConstant(),
       );
 }
 
-abstract class CrdItem<L extends PmLib<L>> {
-  Crud<L> get crud;
+abstract class CrdItem {
+  Crud get crud;
 }
 
 @Impl()
-abstract class CrdMsg<L extends PmLib<L>> extends CrdItem<L>
-    implements HasPdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> {
+abstract class CrdMsg extends CrdItem
+    implements HasPdMsg<CrdMsg, CrdFld, CrdEnum> {
   late final path = msg.path.toList(growable: false);
-  late final PmMessage<L> pmMsg = msg.messageLevel.when(
+  late final PmMessage pmMsg = msg.messageLevel.when(
     top: (r) => crud.lib.messages[msg.index],
     nested: (p) => p.payload.pmMsg.nestedMessages$[msg.index],
   );
 
-  late final pmMsgOfType = pmMsg as PmMessageOfType<dynamic, L>;
+  late final pmMsgOfType = pmMsg as PmMessageOfType<dynamic, dynamic>;
 
   late final emptyMessage = pmMsgOfType.emptyMessage$;
 
   late final name = msg.name;
   late final label = name.camelCaseToLabel;
 
-  Iterable<Widget> fieldTiles<T>(RxVarOpt<T> rxVar) {
-    return msg.pdxs.map((e) => e.when(
-          top: (top) => top.payload.crudTileFromVar(rxVar),
-          oneof: (oneof) {
-            final of =
-                pmMsgOfType.oneofs$[oneof.index] as PmTypedOneOf<T, Enum>;
-            return rxVar
+  Iterable<Widget> fieldTilesFor<T>(RxVarOpt<T> rxVar) =>
+      fieldTiles.map((e) => e(rxVar));
+
+  late final Iterable<Widget Function<T>(RxVarOpt<T> rxVar)> fieldTiles =
+      msg.pdxs.map(
+    (e) => e.when(
+      top: (top) =>
+          <T>(RxVarOpt<T> rxVar) => top.payload.crudTileFromVar(rxVar),
+      oneof: (oneof) {
+        final of =
+            pmMsgOfType.oneofs$[oneof.index] as PmTypedOneOf<dynamic, Enum>;
+        final label = oneof.name.camelCaseToLabel;
+        final values = of.values();
+        final caseLabels =
+            values.map((e) => e.name.camelCaseToLabel).toList(growable: false);
+
+        final notSet = values.last;
+
+        final fields = oneof.fields.payloads.toList(growable: false);
+
+        CrdFld whichField(Enum which) => fields[which.index];
+
+        void onChange<T>(RxVarOpt<T> rxVar, Enum which) {
+          rxVar.rebuildCastProto(
+            updates: (value) {
+              if (which == notSet) {
+                of.clear(value);
+              } else {
+                whichField(which).ensure(value);
+              }
+            },
+          );
+        }
+
+        Widget whichWidget<T>(RxVarOpt<T> rxVar, Enum which) {
+          if (which == notSet) {
+            return const NullWidget();
+          } else {
+            return whichField(which).crudTileFromVar(rxVar);
+          }
+        }
+
+        return <T>(RxVarOpt<T> rxVar) => rxVar
                 .mapOpt((value) => of.which(value))
                 .rxBuilderOrNull((context, which) {
               return Column(
                 children: [
                   ListTile(
-                    title: Text(oneof.name.camelCaseToLabel),
-                    subtitle: Text(which.name.camelCaseToLabel),
-                  )
+                    title: Text(label),
+                    subtitle: Text(caseLabels[which.index]),
+                    onTap: () {
+                      SelectDialog.showModal<Enum>(
+                        context,
+                        selectedValue: which,
+                        items: values,
+                        onChange: (which) => onChange(rxVar, which),
+                        showSearchBox: false,
+                        itemBuilder: (context, item, isSelected) => ListTile(
+                          title: Text(caseLabels[item.index]),
+                          selected: isSelected,
+                        ),
+                      );
+                    },
+                  ),
+                  whichWidget(rxVar, which),
                 ],
               );
             });
-          },
-        ));
-  }
+      },
+    ),
+  );
 
   void showCrudPage<T>({
     required BuildContext context,
@@ -191,7 +255,7 @@ abstract class CrdMsg<L extends PmLib<L>> extends CrdItem<L>
           actionsBar,
           SingleChildScrollView(
             child: Column(
-              children: fieldTiles(rxVar).toList(),
+              children: fieldTilesFor(rxVar).toList(),
             ),
           )
         ],
@@ -210,46 +274,75 @@ abstract class CrdMsg<L extends PmLib<L>> extends CrdItem<L>
 // extension ModifierX<T> on Modifier<T> {}
 
 @Impl()
-abstract class CrdFld<L extends PmLib<L>> extends CrdItem<L>
-    implements HasPdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> {
-  late final pmFld = fld.msg.payload.pmMsgOfType.fields$[fld.index]
-      as PmTypedField<dynamic, dynamic, L>;
+abstract class CrdFld extends CrdItem
+    implements HasPdFld<CrdMsg, CrdFld, CrdEnum> {
+  late final pmFld = fld.msg.payload.pmMsgOfType.fields$[fld.index];
   late final name = fld.name;
   late final label = name.camelCaseToLabel;
 
-  late final pmSingleFld = pmFld as PmSingleField<dynamic, dynamic, L>;
+  late final pmFldRead = pmFld as PmFieldRead;
+  late final pmFldFull = pmFld as PmFieldFull;
+  late final pmFldMessage = pmFld as PmFieldMessage;
 
-  late final access = (fld.isCollection
-      ? mk.PmAccessRead.create(pmFld) as PmAccessBase<dynamic, dynamic>
-      : mk.PmAccessFull.create(pmSingleFld));
+  late final PmAccessRead$Base access = () {
+    if (fld.isCollection) {
+      // ignore: unnecessary_cast
+      return mk.PmAccessRead.create(pmFldRead) as PmAccessRead$Base;
+    } else if (fld.isTypeMessage) {
+      return mk.PmAccessMessage.create(pmFldMessage);
+    } else {
+      return mk.PmAccessFull.create(pmFldFull);
+    }
+  }();
 
-  PrxBase prx<T>(RxVarOpt<T> messageVar) {
-    return access.when(
-      read: (read) => mk.PrxCollectionBase.fromFieldRebuilder(
-        rxVar: messageVar,
-        field: read,
-        rebuild: castProtoRebuilder,
-      ),
-      full: (full) => mk.PrxSingleBase.fromFieldRebuilder(
-        rxVar: messageVar,
-        field: full,
-        rebuild: castProtoRebuilder,
-      ),
-    );
-  }
+  late final PrxBase Function<T>(RxVarOpt<T> messageVar) prx = access.when(
+    read: (read) => <T>(messageVar) => mk.PrxCollectionBase.fromFieldRebuilder(
+          rxVar: messageVar,
+          field: read,
+          rebuild: castProtoRebuilder,
+        ),
+    full: (full) => <T>(messageVar) => mk.PrxSingleBase.fromFieldRebuilder(
+          rxVar: messageVar,
+          field: full,
+          rebuild: castProtoRebuilder,
+        ),
+    message: (message) =>
+        <T>(messageVar) => mk.PrxSingleBase.fromMessageFieldRebuilder(
+              rxVar: messageVar,
+              field: message,
+              rebuild: castProtoRebuilder,
+              defaultMessage: defaultSingleValue,
+            ),
+  );
 
-  late final defaultSingleValue = fld.singleValueType.when(
-    messageType: (messageType) => messageType.payload.emptyMessage,
+  late final dynamic Function() defaultSingleValue = fld.singleValueType.when(
+    messageType: (messageType) => () => messageType.payload.emptyMessage,
+  );
+
+  late final dynamic Function(dynamic value) ensure = access.when(
+    message: (message) => (value) => message.ensure(value),
   );
 
   Widget crudTileFromVar<T>(RxVarOpt<T> rxVar) => crudTile(prx(rxVar));
 
-  late final Widget Function<T>(PrxBase<T> prx) crudTile = fld.cardinality.when(
+  late final Widget Function<T>(PrxBase<T> prx) crudTile = crud.tileOverrides
+          ?.call(fld.fieldIndex)
+          ?.let((fn) => <T>(prx) => fn(this, prx, TileDefaults())) ??
+      defaultCrudTile;
+
+  late final Widget Function<T>(PrxBase<T> prx) defaultCrudTile =
+      fld.cardinality.when(
     single: () => <T>(prx) {
       prx as PrxSingleBase<T>;
       return fld.valueType.when(
         boolType: () => _boolTile(prx.castOptVar<bool>()),
         stringType: () => _stringTile(prx.castOptVar<String>()),
+        intType: () => _intTile(prx.castOptVar<int>()),
+        enumType: (enumType) => _enumTile(
+          enumType.payload,
+          prx.castOptVar<ProtobufEnum>(),
+        ),
+        messageType: (messageType) => _messageTile(messageType.payload, prx),
       );
     },
     mapOf: (mapOf) => <T>(prx) => _intMapButton(
@@ -258,9 +351,35 @@ abstract class CrdFld<L extends PmLib<L>> extends CrdItem<L>
         ),
     repeated: () => <T>(prx) => _listButton(
           prx: (prx as PrxCollectionBase<T>).castPrx<List<dynamic>>(),
-          create: () => defaultSingleValue,
+          create: defaultSingleValue,
         ),
   );
+
+  Widget _messageTile<T>(CrdMsg msg, RxVarOpt<T> prx) {
+    return Column(
+      children: msg.fieldTilesFor(prx).toList(),
+    );
+  }
+
+  Widget _enumTile<T>(CrdEnum msg, RxVarOpt<ProtobufEnum> prx) {
+    final rx = prx.mapOpt((v) => v.name).orDefault('<not set>');
+    return mk.CrudButton.data(
+      subtitle: rx,
+      onTap: mk.RxVar.variable((context) {
+        SelectDialog.showModal<ProtobufEnum>(
+          context,
+          items: msg.pmEnum.values(),
+          itemBuilder: (context, item, isSelected) => ListTile(
+            title: Text(item.label),
+          ),
+          showSearchBox: false,
+          onChange: (value) {},
+
+        );
+      }),
+      label: label,
+    );
+  }
 
   Widget _boolTile(RxVarOpt<bool> prx) {
     return mk.CrudSwitch.data(
@@ -286,9 +405,30 @@ abstract class CrdFld<L extends PmLib<L>> extends CrdItem<L>
     );
   }
 
+  Widget _intTile(RxVarOpt<int> prx) {
+    final stringOptRx = prx.mapOpt((v) => v.toString());
+    return mk.CrudButton.data(
+      subtitle: stringOptRx.orDefault('<not set>'),
+      onTap: mk.RxVar.variable((context) {
+        StringDialogEditor(
+          title: label,
+          setter: (str) {
+            try {
+              prx.set(int.parse(str).here());
+            } catch (_) {}
+          },
+        ).show(
+          context,
+          stringOptRx.value.orDefault(''),
+        );
+      }),
+      label: label,
+    );
+  }
+
   Widget _intMapButton<V>(
     PrxCollectionBase<Map<int, V>> prxMap,
-    CrdFld<L> valueField,
+    CrdFld valueField,
   ) {
     return mk.CrudButton.data(
       label: label,
@@ -311,7 +451,7 @@ abstract class CrdFld<L extends PmLib<L>> extends CrdItem<L>
 
   Widget _intMapPage<V>(
     PrxCollectionBase<Map<int, V>> prx,
-    CrdFld<L> valueField,
+    CrdFld valueField,
   ) {
     return valueField.fld.valueType.when(
       messageType: (msg) {
@@ -403,8 +543,14 @@ abstract class CrdFld<L extends PmLib<L>> extends CrdItem<L>
 }
 
 @Impl()
-abstract class CrdEnum<L extends PmLib<L>> extends CrdItem<L>
-    implements HasPdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> {}
+abstract class CrdEnum extends CrdItem
+    implements HasPdEnum<CrdMsg, CrdFld, CrdEnum> {
+  late final PmEnum pmEnum = enm.parent.when(
+    root: (root) => crud.lib.enums[enm.index],
+    msg: (msg) => msg.payload.pmMsg.nestedEnums$[enm.index],
+  );
+
+}
 
 abstract class CrxField<T> implements RxValOpt<T> {
   CrdFld get crd;

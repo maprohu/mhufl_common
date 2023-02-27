@@ -6,34 +6,34 @@ part of 'crud.dart';
 // ImplGenerator
 // **************************************************************************
 
-class CrdMsg$Data<L extends PmLib<L>> {
-  final Crud<L> Function() crud;
-  final PdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() msg;
+class CrdMsg$Data {
+  final Crud Function() crud;
+  final PdMsg<CrdMsg, CrdFld, CrdEnum> Function() msg;
   CrdMsg$Data({
     required this.crud,
     required this.msg,
   });
 }
 
-class CrdMsg$Impl<L extends PmLib<L>> extends CrdMsg<L> {
-  final CrdMsg$Data<L> _data;
+class CrdMsg$Impl extends CrdMsg {
+  final CrdMsg$Data _data;
   CrdMsg$Impl(this._data);
-  Crud<L> get crud => _data.crud();
-  PdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> get msg => _data.msg();
+  Crud get crud => _data.crud();
+  PdMsg<CrdMsg, CrdFld, CrdEnum> get msg => _data.msg();
 }
 
-class CrdMsg$Delegate<L extends PmLib<L>> extends CrdMsg<L> {
-  final CrdMsg<L> Function() _delegate;
+class CrdMsg$Delegate extends CrdMsg {
+  final CrdMsg Function() _delegate;
   CrdMsg$Delegate(this._delegate);
-  Crud<L> get crud => _delegate().crud;
-  PdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> get msg => _delegate().msg;
+  Crud get crud => _delegate().crud;
+  PdMsg<CrdMsg, CrdFld, CrdEnum> get msg => _delegate().msg;
 }
 
 class CrdMsg$Factory {
   const CrdMsg$Factory();
-  CrdMsg<L> call<L extends PmLib<L>>({
-    required Crud<L> Function() crud,
-    required PdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() msg,
+  CrdMsg call({
+    required Crud Function() crud,
+    required PdMsg<CrdMsg, CrdFld, CrdEnum> Function() msg,
   }) =>
       CrdMsg$Impl(
         CrdMsg$Data(
@@ -41,9 +41,9 @@ class CrdMsg$Factory {
           msg: msg,
         ),
       );
-  CrdMsg<L> create<L extends PmLib<L>>({
-    required Crud<L> Function() crud,
-    required PdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() msg,
+  CrdMsg create({
+    required Crud Function() crud,
+    required PdMsg<CrdMsg, CrdFld, CrdEnum> Function() msg,
   }) =>
       CrdMsg$Impl(
         CrdMsg$Data(
@@ -51,9 +51,9 @@ class CrdMsg$Factory {
           msg: msg,
         ),
       );
-  CrdMsg<L> data<L extends PmLib<L>>({
-    required Crud<L> crud,
-    required PdMsg<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> msg,
+  CrdMsg data({
+    required Crud crud,
+    required PdMsg<CrdMsg, CrdFld, CrdEnum> msg,
   }) =>
       CrdMsg$Impl(
         CrdMsg$Data(
@@ -61,8 +61,8 @@ class CrdMsg$Factory {
           msg: msg.asConstant(),
         ),
       );
-  CrdMsg<L> delegate<L extends PmLib<L>>(
-    CrdMsg<L> Function() delegate,
+  CrdMsg delegate(
+    CrdMsg Function() delegate,
   ) =>
       CrdMsg$Delegate(
         delegate,
@@ -75,34 +75,34 @@ extension CrdMsg$Ext$Mk on Mk {
   CrdMsg$Factory get CrdMsg => crdMsg$Factory;
 }
 
-class CrdFld$Data<L extends PmLib<L>> {
-  final Crud<L> Function() crud;
-  final PdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() fld;
+class CrdFld$Data {
+  final Crud Function() crud;
+  final PdFld<CrdMsg, CrdFld, CrdEnum> Function() fld;
   CrdFld$Data({
     required this.crud,
     required this.fld,
   });
 }
 
-class CrdFld$Impl<L extends PmLib<L>> extends CrdFld<L> {
-  final CrdFld$Data<L> _data;
+class CrdFld$Impl extends CrdFld {
+  final CrdFld$Data _data;
   CrdFld$Impl(this._data);
-  Crud<L> get crud => _data.crud();
-  PdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> get fld => _data.fld();
+  Crud get crud => _data.crud();
+  PdFld<CrdMsg, CrdFld, CrdEnum> get fld => _data.fld();
 }
 
-class CrdFld$Delegate<L extends PmLib<L>> extends CrdFld<L> {
-  final CrdFld<L> Function() _delegate;
+class CrdFld$Delegate extends CrdFld {
+  final CrdFld Function() _delegate;
   CrdFld$Delegate(this._delegate);
-  Crud<L> get crud => _delegate().crud;
-  PdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> get fld => _delegate().fld;
+  Crud get crud => _delegate().crud;
+  PdFld<CrdMsg, CrdFld, CrdEnum> get fld => _delegate().fld;
 }
 
 class CrdFld$Factory {
   const CrdFld$Factory();
-  CrdFld<L> call<L extends PmLib<L>>({
-    required Crud<L> Function() crud,
-    required PdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() fld,
+  CrdFld call({
+    required Crud Function() crud,
+    required PdFld<CrdMsg, CrdFld, CrdEnum> Function() fld,
   }) =>
       CrdFld$Impl(
         CrdFld$Data(
@@ -110,9 +110,9 @@ class CrdFld$Factory {
           fld: fld,
         ),
       );
-  CrdFld<L> create<L extends PmLib<L>>({
-    required Crud<L> Function() crud,
-    required PdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() fld,
+  CrdFld create({
+    required Crud Function() crud,
+    required PdFld<CrdMsg, CrdFld, CrdEnum> Function() fld,
   }) =>
       CrdFld$Impl(
         CrdFld$Data(
@@ -120,9 +120,9 @@ class CrdFld$Factory {
           fld: fld,
         ),
       );
-  CrdFld<L> data<L extends PmLib<L>>({
-    required Crud<L> crud,
-    required PdFld<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> fld,
+  CrdFld data({
+    required Crud crud,
+    required PdFld<CrdMsg, CrdFld, CrdEnum> fld,
   }) =>
       CrdFld$Impl(
         CrdFld$Data(
@@ -130,8 +130,8 @@ class CrdFld$Factory {
           fld: fld.asConstant(),
         ),
       );
-  CrdFld<L> delegate<L extends PmLib<L>>(
-    CrdFld<L> Function() delegate,
+  CrdFld delegate(
+    CrdFld Function() delegate,
   ) =>
       CrdFld$Delegate(
         delegate,
@@ -144,34 +144,34 @@ extension CrdFld$Ext$Mk on Mk {
   CrdFld$Factory get CrdFld => crdFld$Factory;
 }
 
-class CrdEnum$Data<L extends PmLib<L>> {
-  final Crud<L> Function() crud;
-  final PdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() enm;
+class CrdEnum$Data {
+  final Crud Function() crud;
+  final PdEnum<CrdMsg, CrdFld, CrdEnum> Function() enm;
   CrdEnum$Data({
     required this.crud,
     required this.enm,
   });
 }
 
-class CrdEnum$Impl<L extends PmLib<L>> extends CrdEnum<L> {
-  final CrdEnum$Data<L> _data;
+class CrdEnum$Impl extends CrdEnum {
+  final CrdEnum$Data _data;
   CrdEnum$Impl(this._data);
-  Crud<L> get crud => _data.crud();
-  PdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> get enm => _data.enm();
+  Crud get crud => _data.crud();
+  PdEnum<CrdMsg, CrdFld, CrdEnum> get enm => _data.enm();
 }
 
-class CrdEnum$Delegate<L extends PmLib<L>> extends CrdEnum<L> {
-  final CrdEnum<L> Function() _delegate;
+class CrdEnum$Delegate extends CrdEnum {
+  final CrdEnum Function() _delegate;
   CrdEnum$Delegate(this._delegate);
-  Crud<L> get crud => _delegate().crud;
-  PdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> get enm => _delegate().enm;
+  Crud get crud => _delegate().crud;
+  PdEnum<CrdMsg, CrdFld, CrdEnum> get enm => _delegate().enm;
 }
 
 class CrdEnum$Factory {
   const CrdEnum$Factory();
-  CrdEnum<L> call<L extends PmLib<L>>({
-    required Crud<L> Function() crud,
-    required PdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() enm,
+  CrdEnum call({
+    required Crud Function() crud,
+    required PdEnum<CrdMsg, CrdFld, CrdEnum> Function() enm,
   }) =>
       CrdEnum$Impl(
         CrdEnum$Data(
@@ -179,9 +179,9 @@ class CrdEnum$Factory {
           enm: enm,
         ),
       );
-  CrdEnum<L> create<L extends PmLib<L>>({
-    required Crud<L> Function() crud,
-    required PdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> Function() enm,
+  CrdEnum create({
+    required Crud Function() crud,
+    required PdEnum<CrdMsg, CrdFld, CrdEnum> Function() enm,
   }) =>
       CrdEnum$Impl(
         CrdEnum$Data(
@@ -189,9 +189,9 @@ class CrdEnum$Factory {
           enm: enm,
         ),
       );
-  CrdEnum<L> data<L extends PmLib<L>>({
-    required Crud<L> crud,
-    required PdEnum<CrdMsg<L>, CrdFld<L>, CrdEnum<L>> enm,
+  CrdEnum data({
+    required Crud crud,
+    required PdEnum<CrdMsg, CrdFld, CrdEnum> enm,
   }) =>
       CrdEnum$Impl(
         CrdEnum$Data(
@@ -199,8 +199,8 @@ class CrdEnum$Factory {
           enm: enm.asConstant(),
         ),
       );
-  CrdEnum<L> delegate<L extends PmLib<L>>(
-    CrdEnum<L> Function() delegate,
+  CrdEnum delegate(
+    CrdEnum Function() delegate,
   ) =>
       CrdEnum$Delegate(
         delegate,
@@ -217,7 +217,7 @@ class CrxCollectionField$Data<T> {
   final void Function(void Function(T) updates) rebuild;
   final Stream<Opt<T>> Function() changes;
   final Opt<T> Function() get;
-  final CrdFld<PmLib<dynamic>> Function() crd;
+  final CrdFld Function() crd;
   CrxCollectionField$Data({
     required this.rebuild,
     required this.changes,
@@ -232,7 +232,7 @@ class CrxCollectionField$Impl<T> extends CrxCollectionField<T> {
   void rebuild(void Function(T) updates) => _data.rebuild(updates);
   Stream<Opt<T>> changes() => _data.changes();
   Opt<T> get() => _data.get();
-  CrdFld<PmLib<dynamic>> get crd => _data.crd();
+  CrdFld get crd => _data.crd();
 }
 
 class CrxCollectionField$Delegate<T> extends CrxCollectionField<T> {
@@ -241,7 +241,7 @@ class CrxCollectionField$Delegate<T> extends CrxCollectionField<T> {
   void rebuild(void Function(T) updates) => _delegate().rebuild(updates);
   Stream<Opt<T>> changes() => _delegate().changes();
   Opt<T> get() => _delegate().get();
-  CrdFld<PmLib<dynamic>> get crd => _delegate().crd;
+  CrdFld get crd => _delegate().crd;
 }
 
 class CrxCollectionField$Factory {
@@ -250,7 +250,7 @@ class CrxCollectionField$Factory {
     required void Function(void Function(T) updates) rebuild,
     required Stream<Opt<T>> Function() changes,
     required Opt<T> Function() get,
-    required CrdFld<PmLib<dynamic>> Function() crd,
+    required CrdFld Function() crd,
   }) =>
       CrxCollectionField$Impl(
         CrxCollectionField$Data(
@@ -264,7 +264,7 @@ class CrxCollectionField$Factory {
     required void Function(void Function(T) updates) rebuild,
     required Stream<Opt<T>> Function() changes,
     required Opt<T> Function() get,
-    required CrdFld<PmLib<dynamic>> Function() crd,
+    required CrdFld Function() crd,
   }) =>
       CrxCollectionField$Impl(
         CrxCollectionField$Data(
@@ -278,7 +278,7 @@ class CrxCollectionField$Factory {
     required void Function(void Function(T) updates) rebuild,
     required Stream<Opt<T>> Function() changes,
     required Opt<T> Function() get,
-    required CrdFld<PmLib<dynamic>> crd,
+    required CrdFld crd,
   }) =>
       CrxCollectionField$Impl(
         CrxCollectionField$Data(
@@ -296,7 +296,7 @@ class CrxCollectionField$Factory {
       );
   CrxCollectionField<T> fromPrxCollectionBase<T>({
     required PrxCollectionBase<T> prxCollectionBase,
-    required CrdFld<PmLib<dynamic>> Function() crd,
+    required CrdFld Function() crd,
   }) =>
       create(
         rebuild: prxCollectionBase.rebuild,
@@ -317,7 +317,7 @@ class CrxSingleField$Data<T> {
   final void Function(Opt<T> value) set;
   final Opt<T> Function() get;
   final Stream<Opt<T>> Function() changes;
-  final CrdFld<PmLib<dynamic>> Function() crd;
+  final CrdFld Function() crd;
   CrxSingleField$Data({
     required this.set,
     required this.get,
@@ -332,7 +332,7 @@ class CrxSingleField$Impl<T> extends CrxSingleField<T> {
   void set(Opt<T> value) => _data.set(value);
   Opt<T> get() => _data.get();
   Stream<Opt<T>> changes() => _data.changes();
-  CrdFld<PmLib<dynamic>> get crd => _data.crd();
+  CrdFld get crd => _data.crd();
 }
 
 class CrxSingleField$Delegate<T> extends CrxSingleField<T> {
@@ -341,7 +341,7 @@ class CrxSingleField$Delegate<T> extends CrxSingleField<T> {
   void set(Opt<T> value) => _delegate().set(value);
   Opt<T> get() => _delegate().get();
   Stream<Opt<T>> changes() => _delegate().changes();
-  CrdFld<PmLib<dynamic>> get crd => _delegate().crd;
+  CrdFld get crd => _delegate().crd;
 }
 
 class CrxSingleField$Factory {
@@ -350,7 +350,7 @@ class CrxSingleField$Factory {
     required void Function(Opt<T> value) set,
     required Opt<T> Function() get,
     required Stream<Opt<T>> Function() changes,
-    required CrdFld<PmLib<dynamic>> Function() crd,
+    required CrdFld Function() crd,
   }) =>
       CrxSingleField$Impl(
         CrxSingleField$Data(
@@ -364,7 +364,7 @@ class CrxSingleField$Factory {
     required void Function(Opt<T> value) set,
     required Opt<T> Function() get,
     required Stream<Opt<T>> Function() changes,
-    required CrdFld<PmLib<dynamic>> Function() crd,
+    required CrdFld Function() crd,
   }) =>
       CrxSingleField$Impl(
         CrxSingleField$Data(
@@ -378,7 +378,7 @@ class CrxSingleField$Factory {
     required void Function(Opt<T> value) set,
     required Opt<T> Function() get,
     required Stream<Opt<T>> Function() changes,
-    required CrdFld<PmLib<dynamic>> crd,
+    required CrdFld crd,
   }) =>
       CrxSingleField$Impl(
         CrxSingleField$Data(
@@ -396,7 +396,7 @@ class CrxSingleField$Factory {
       );
   CrxSingleField<T> fromPrxSingleBase<T>({
     required PrxSingleBase<T> prxSingleBase,
-    required CrdFld<PmLib<dynamic>> Function() crd,
+    required CrdFld Function() crd,
   }) =>
       create(
         set: prxSingleBase.set,
