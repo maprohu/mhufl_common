@@ -6,8 +6,13 @@ part of 'crud_widgets.dart';
 // ImplGenerator
 // **************************************************************************
 
-class CrudSwitch$Data {
-  final RxVar<bool> Function() rxVar;
+abstract class CrudSwitch$IData {
+  HasData<RxVar$IData<bool>> Function() get rxVar;
+  String Function() get label;
+}
+
+class CrudSwitch$Data implements CrudSwitch$IData {
+  final HasData<RxVar$IData<bool>> Function() rxVar;
   final String Function() label;
   CrudSwitch$Data({
     required this.rxVar,
@@ -15,14 +20,21 @@ class CrudSwitch$Data {
   });
 }
 
-class CrudSwitch$Impl extends CrudSwitch {
-  final CrudSwitch$Data _data;
+class CrudSwitch$Impl extends CrudSwitch implements HasData<CrudSwitch$IData> {
+  final CrudSwitch$IData data$;
   const CrudSwitch$Impl(
-    this._data, {
+    this.data$, {
     super.key,
   });
-  RxVar<bool> get rxVar => _data.rxVar();
-  String get label => _data.label();
+  HasData<RxVar$IData<bool>> get rxVar => data$.rxVar();
+  String get label => data$.label();
+}
+
+typedef ICrudSwitch = HasData<CrudSwitch$IData>;
+
+extension ICrudSwitch$Ext on ICrudSwitch {
+  HasData<RxVar$IData<bool>> get rxVar => data$.rxVar();
+  String get label => data$.label();
 }
 
 class CrudSwitch$Delegate extends CrudSwitch {
@@ -31,14 +43,14 @@ class CrudSwitch$Delegate extends CrudSwitch {
     this._delegate, {
     super.key,
   });
-  RxVar<bool> get rxVar => _delegate().rxVar;
+  HasData<RxVar$IData<bool>> get rxVar => _delegate().rxVar;
   String get label => _delegate().label;
 }
 
 class CrudSwitch$Factory {
   const CrudSwitch$Factory();
-  CrudSwitch call({
-    required RxVar<bool> Function() rxVar,
+  CrudSwitch$Impl call({
+    required HasData<RxVar$IData<bool>> Function() rxVar,
     required String Function() label,
     Key? key,
   }) =>
@@ -49,8 +61,8 @@ class CrudSwitch$Factory {
         ),
         key: key,
       );
-  CrudSwitch create({
-    required RxVar<bool> Function() rxVar,
+  CrudSwitch$Impl create({
+    required HasData<RxVar$IData<bool>> Function() rxVar,
     required String Function() label,
     Key? key,
   }) =>
@@ -61,8 +73,8 @@ class CrudSwitch$Factory {
         ),
         key: key,
       );
-  CrudSwitch data({
-    required RxVar<bool> rxVar,
+  CrudSwitch$Impl data({
+    required HasData<RxVar$IData<bool>> rxVar,
     required String label,
     Key? key,
   }) =>
@@ -89,10 +101,16 @@ extension CrudSwitch$Ext$Mk on Mk {
   CrudSwitch$Factory get CrudSwitch => crudSwitch$Factory;
 }
 
-class CrudButton$Data {
+abstract class CrudButton$IData {
+  String Function() get label;
+  HasData<RxVal$IData<String>> Function() get subtitle;
+  HasData<RxVal$IData<void Function(BuildContext)?>> Function() get onTap;
+}
+
+class CrudButton$Data implements CrudButton$IData {
   final String Function() label;
-  final RxVal<String> Function() subtitle;
-  final RxVal<void Function(BuildContext)?> Function() onTap;
+  final HasData<RxVal$IData<String>> Function() subtitle;
+  final HasData<RxVal$IData<void Function(BuildContext)?>> Function() onTap;
   CrudButton$Data({
     required this.label,
     required this.subtitle,
@@ -100,15 +118,23 @@ class CrudButton$Data {
   });
 }
 
-class CrudButton$Impl extends CrudButton {
-  final CrudButton$Data _data;
+class CrudButton$Impl extends CrudButton implements HasData<CrudButton$IData> {
+  final CrudButton$IData data$;
   const CrudButton$Impl(
-    this._data, {
+    this.data$, {
     super.key,
   });
-  String get label => _data.label();
-  RxVal<String> get subtitle => _data.subtitle();
-  RxVal<void Function(BuildContext)?> get onTap => _data.onTap();
+  String get label => data$.label();
+  HasData<RxVal$IData<String>> get subtitle => data$.subtitle();
+  HasData<RxVal$IData<void Function(BuildContext)?>> get onTap => data$.onTap();
+}
+
+typedef ICrudButton = HasData<CrudButton$IData>;
+
+extension ICrudButton$Ext on ICrudButton {
+  String get label => data$.label();
+  HasData<RxVal$IData<String>> get subtitle => data$.subtitle();
+  HasData<RxVal$IData<void Function(BuildContext)?>> get onTap => data$.onTap();
 }
 
 class CrudButton$Delegate extends CrudButton {
@@ -118,16 +144,18 @@ class CrudButton$Delegate extends CrudButton {
     super.key,
   });
   String get label => _delegate().label;
-  RxVal<String> get subtitle => _delegate().subtitle;
-  RxVal<void Function(BuildContext)?> get onTap => _delegate().onTap;
+  HasData<RxVal$IData<String>> get subtitle => _delegate().subtitle;
+  HasData<RxVal$IData<void Function(BuildContext)?>> get onTap =>
+      _delegate().onTap;
 }
 
 class CrudButton$Factory {
   const CrudButton$Factory();
-  CrudButton call({
+  CrudButton$Impl call({
     required String Function() label,
-    required RxVal<String> Function() subtitle,
-    required RxVal<void Function(BuildContext)?> Function() onTap,
+    required HasData<RxVal$IData<String>> Function() subtitle,
+    required HasData<RxVal$IData<void Function(BuildContext)?>> Function()
+        onTap,
     Key? key,
   }) =>
       CrudButton$Impl(
@@ -138,10 +166,11 @@ class CrudButton$Factory {
         ),
         key: key,
       );
-  CrudButton create({
+  CrudButton$Impl create({
     required String Function() label,
-    required RxVal<String> Function() subtitle,
-    required RxVal<void Function(BuildContext)?> Function() onTap,
+    required HasData<RxVal$IData<String>> Function() subtitle,
+    required HasData<RxVal$IData<void Function(BuildContext)?>> Function()
+        onTap,
     Key? key,
   }) =>
       CrudButton$Impl(
@@ -152,10 +181,10 @@ class CrudButton$Factory {
         ),
         key: key,
       );
-  CrudButton data({
+  CrudButton$Impl data({
     required String label,
-    required RxVal<String> subtitle,
-    required RxVal<void Function(BuildContext)?> onTap,
+    required HasData<RxVal$IData<String>> subtitle,
+    required HasData<RxVal$IData<void Function(BuildContext)?>> onTap,
     Key? key,
   }) =>
       CrudButton$Impl(
@@ -182,8 +211,13 @@ extension CrudButton$Ext$Mk on Mk {
   CrudButton$Factory get CrudButton => crudButton$Factory;
 }
 
-class CrudMapPage$Data<V> {
-  final RxVal<Opt<List<Widget>>> Function() items;
+abstract class CrudMapPage$IData<V> {
+  HasData<RxVal$IData<Opt<List<Widget>>>> Function() get items;
+  void Function(BuildContext) Function() get onAdd;
+}
+
+class CrudMapPage$Data<V> implements CrudMapPage$IData<V> {
+  final HasData<RxVal$IData<Opt<List<Widget>>>> Function() items;
   final void Function(BuildContext) Function() onAdd;
   CrudMapPage$Data({
     required this.items,
@@ -191,14 +225,22 @@ class CrudMapPage$Data<V> {
   });
 }
 
-class CrudMapPage$Impl<V> extends CrudMapPage<V> {
-  final CrudMapPage$Data<V> _data;
+class CrudMapPage$Impl<V> extends CrudMapPage<V>
+    implements HasData<CrudMapPage$IData<V>> {
+  final CrudMapPage$IData<V> data$;
   const CrudMapPage$Impl(
-    this._data, {
+    this.data$, {
     super.key,
   });
-  RxVal<Opt<List<Widget>>> get items => _data.items();
-  void Function(BuildContext) get onAdd => _data.onAdd();
+  HasData<RxVal$IData<Opt<List<Widget>>>> get items => data$.items();
+  void Function(BuildContext) get onAdd => data$.onAdd();
+}
+
+typedef ICrudMapPage<V> = HasData<CrudMapPage$IData<V>>;
+
+extension ICrudMapPage$Ext<V> on ICrudMapPage<V> {
+  HasData<RxVal$IData<Opt<List<Widget>>>> get items => data$.items();
+  void Function(BuildContext) get onAdd => data$.onAdd();
 }
 
 class CrudMapPage$Delegate<V> extends CrudMapPage<V> {
@@ -207,14 +249,14 @@ class CrudMapPage$Delegate<V> extends CrudMapPage<V> {
     this._delegate, {
     super.key,
   });
-  RxVal<Opt<List<Widget>>> get items => _delegate().items;
+  HasData<RxVal$IData<Opt<List<Widget>>>> get items => _delegate().items;
   void Function(BuildContext) get onAdd => _delegate().onAdd;
 }
 
 class CrudMapPage$Factory {
   const CrudMapPage$Factory();
-  CrudMapPage<V> call<V>({
-    required RxVal<Opt<List<Widget>>> Function() items,
+  CrudMapPage$Impl<V> call<V>({
+    required HasData<RxVal$IData<Opt<List<Widget>>>> Function() items,
     required void Function(BuildContext) Function() onAdd,
     Key? key,
   }) =>
@@ -225,8 +267,8 @@ class CrudMapPage$Factory {
         ),
         key: key,
       );
-  CrudMapPage<V> create<V>({
-    required RxVal<Opt<List<Widget>>> Function() items,
+  CrudMapPage$Impl<V> create<V>({
+    required HasData<RxVal$IData<Opt<List<Widget>>>> Function() items,
     required void Function(BuildContext) Function() onAdd,
     Key? key,
   }) =>
@@ -237,8 +279,8 @@ class CrudMapPage$Factory {
         ),
         key: key,
       );
-  CrudMapPage<V> data<V>({
-    required RxVal<Opt<List<Widget>>> items,
+  CrudMapPage$Impl<V> data<V>({
+    required HasData<RxVal$IData<Opt<List<Widget>>>> items,
     required void Function(BuildContext) onAdd,
     Key? key,
   }) =>

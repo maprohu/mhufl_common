@@ -4,9 +4,10 @@ import 'package:mhudart_common/mhdart_common.dart';
 
 import 'widgets.dart';
 
+
 class RxBuilder<T> extends StatelessWidget {
   final Widget Function(BuildContext context, T value) builder;
-  final RxVal<T> stream;
+  final IRxVal<T> stream;
 
   const RxBuilder({
     Key? key,
@@ -25,7 +26,7 @@ class RxBuilder<T> extends StatelessWidget {
 }
 
 class RxText<T> extends StatelessWidget {
-  final RxVal<String> _stream;
+  final IRxVal<String> _stream;
 
   const RxText(this._stream, {super.key});
 
@@ -40,11 +41,11 @@ class RxText<T> extends StatelessWidget {
   }
 }
 
-extension RxValWidgetX<T> on RxVal<T> {
+extension RxValWidgetX<T> on IRxVal<T> {
   Widget rxText(String Function(T value) text) => map(text).rxText();
 }
 
-extension RxValStringWidgetX on RxVal<String> {
+extension RxValStringWidgetX on IRxVal<String> {
   Widget rxText() => RxText(this);
 }
 
@@ -56,7 +57,7 @@ extension StreamStringWidgetX on Stream<String> {
 }
 
 extension WidgetX on Widget {
-  Widget when(RxVal<bool> condition) => RxBuilder(
+  Widget when(IRxVal<bool> condition) => RxBuilder(
         stream: condition,
         builder: (context, value) {
           if (value) {
@@ -68,7 +69,7 @@ extension WidgetX on Widget {
       );
 }
 
-extension NullableRxValWidgetX<T extends Object> on RxVal<T?> {
+extension NullableRxValWidgetX<T extends Object> on IRxVal<T?> {
   Widget loadingOr(Widget Function(BuildContext context, T value) builder) =>
       RxBuilder(
         stream: this,
@@ -94,14 +95,14 @@ extension NullableRxValWidgetX<T extends Object> on RxVal<T?> {
       );
 }
 
-extension WidgetRxValWidgetX<T> on RxVal<Widget> {
+extension WidgetRxValWidgetX<T> on IRxVal<Widget> {
   Widget rxWidget() => RxBuilder(
         stream: this,
         builder: (context, value) => value,
       );
 }
 
-extension OptWidgetRxValWidgetX<T> on RxVal<Opt<Widget>> {
+extension OptWidgetRxValWidgetX<T> on IRxVal<Opt<Widget>> {
   Widget rxWidget() => RxBuilder(
         stream: this,
         builder: (context, value) => value.when(
@@ -112,7 +113,7 @@ extension OptWidgetRxValWidgetX<T> on RxVal<Opt<Widget>> {
 }
 
 class RxList<T, I extends Iterable<T>> extends StatelessWidget {
-  final RxVal<I> list;
+  final IRxVal<I> list;
   final ValueBuilder<T> builder;
 
   const RxList({Key? key, required this.list, required this.builder})
@@ -136,7 +137,7 @@ class RxList<T, I extends Iterable<T>> extends StatelessWidget {
 }
 
 class RxColumn<T, I extends Iterable<T>> extends StatelessWidget {
-  final RxVal<I> list;
+  final IRxVal<I> list;
   final ValueBuilder<T> builder;
 
   const RxColumn({Key? key, required this.list, required this.builder})
@@ -165,7 +166,7 @@ class RxColumn<T, I extends Iterable<T>> extends StatelessWidget {
 //       RxList(list: this, builder: builder);
 // }
 
-extension BuiltListRxValX<T> on RxVal<BuiltList<T>> {
+extension BuiltListRxValX<T> on IRxVal<BuiltList<T>> {
   RxList<T, BuiltList<T>> rxList(ValueBuilder<T> builder) =>
       RxList(list: this, builder: builder);
 
@@ -173,12 +174,12 @@ extension BuiltListRxValX<T> on RxVal<BuiltList<T>> {
       RxColumn(list: this, builder: builder);
 }
 
-extension WidgetRxValX<T> on RxVal<T> {
+extension WidgetRxValX<T> on IRxVal<T> {
   RxBuilder<T> rxBuilder(ValueBuilder<T> builder) =>
       RxBuilder(stream: this, builder: builder);
 }
 
-extension WidgetOptRxValX<T> on RxVal<Opt<T>> {
+extension WidgetOptRxValX<T> on IRxVal<Opt<T>> {
   Widget rxBuilderOrNull(ValueBuilder<T> builder) => rxBuilder(
         (context, value) => value.when(
           here: (v) => builder(context, v),
@@ -187,7 +188,7 @@ extension WidgetOptRxValX<T> on RxVal<Opt<T>> {
       );
 }
 
-extension WidgetBoolRxValX on RxVal<bool> {
+extension WidgetBoolRxValX on IRxVal<bool> {
   Widget rxWhen(Widget child) => map((value) {
         if (value) {
           return child;
@@ -196,12 +197,12 @@ extension WidgetBoolRxValX on RxVal<bool> {
         }
       }).rxWidget();
 
-  RxVal<bool> not() => map((b) => !b);
+  IRxVal<bool> not() => map((b) => !b);
 
   Widget rxWhenNot(Widget child) => not().rxWhen(child);
 }
 
-extension StateTypeRxValX<T> on RxVal<StateType> {
+extension StateTypeRxValX<T> on IRxVal<StateType> {
   Widget rxState() => map((value) => StateWidget(state: value)).rxWidget();
 }
 

@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 final log = Logger();
 
 Future<void> startPersistingSharedPreferences<T>(
-  RxVar<T> rxVar,
+  IRxVar<T> rxVar,
   String keyName,
   DisposeAsyncs disposers,
   T Function(String json) fromJson,

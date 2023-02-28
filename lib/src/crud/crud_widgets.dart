@@ -10,7 +10,7 @@ part 'crud_widgets.g.dart';
 
 @Impl()
 abstract class CrudSwitch extends StatelessWidget {
-  RxVar<bool> get rxVar;
+  IRxVar<bool> get rxVar;
 
   String get label;
 
@@ -32,12 +32,12 @@ abstract class CrudSwitch extends StatelessWidget {
   }
 }
 
-extension RxVarBoolXCrudSwitch on RxVar<bool> {
+extension RxVarBoolXCrudSwitch on IRxVar<bool> {
   CrudSwitch crudSwitch(String label) =>
       mk.CrudSwitch.data(rxVar: this, label: label);
 }
 
-extension RxVarOptBoolXCrudSwitch on RxVar<Opt<bool>> {
+extension RxVarOptBoolXCrudSwitch on IRxVar<Opt<bool>> {
   CrudSwitch crudSwitch(String label) => orDefaultVar(false).crudSwitch(label);
 }
 
@@ -45,9 +45,9 @@ extension RxVarOptBoolXCrudSwitch on RxVar<Opt<bool>> {
 abstract class CrudButton extends StatelessWidget {
   String get label;
 
-  RxVal<String> get subtitle;
+  IRxVal<String> get subtitle;
 
-  RxVal<void Function(BuildContext context)?> get onTap;
+  IRxVal<void Function(BuildContext context)?> get onTap;
 
   const CrudButton({Key? key}) : super(key: key);
 
@@ -65,7 +65,7 @@ abstract class CrudButton extends StatelessWidget {
 
 @Impl()
 abstract class CrudMapPage<V> extends StatelessWidget {
-  RxValOpt<List<Widget>> get items;
+  RxValImplOpt<List<Widget>> get items;
 
   void Function(BuildContext context) get onAdd;
 

@@ -10,7 +10,7 @@ abstract class TileConfig {
 
 @Impl()
 abstract class CrudListPageControl<V> {
-  PrxCollectionBase<List<V>> get items;
+  IPrxCollectionBase<List<V>> get items;
 
   TileConfig tile(int index, V item);
 

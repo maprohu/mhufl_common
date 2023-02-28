@@ -6,7 +6,12 @@ part of 'crud_control.dart';
 // ImplGenerator
 // **************************************************************************
 
-class TileConfig$Data {
+abstract class TileConfig$IData {
+  Widget? Function() get title;
+  Widget? Function() get subtitle;
+}
+
+class TileConfig$Data implements TileConfig$IData {
   final Widget? Function() title;
   final Widget? Function() subtitle;
   TileConfig$Data({
@@ -15,11 +20,18 @@ class TileConfig$Data {
   });
 }
 
-class TileConfig$Impl extends TileConfig {
-  final TileConfig$Data _data;
-  TileConfig$Impl(this._data);
-  Widget? get title => _data.title();
-  Widget? get subtitle => _data.subtitle();
+class TileConfig$Impl extends TileConfig implements HasData<TileConfig$IData> {
+  final TileConfig$IData data$;
+  TileConfig$Impl(this.data$);
+  Widget? get title => data$.title();
+  Widget? get subtitle => data$.subtitle();
+}
+
+typedef ITileConfig = HasData<TileConfig$IData>;
+
+extension ITileConfig$Ext on ITileConfig {
+  Widget? get title => data$.title();
+  Widget? get subtitle => data$.subtitle();
 }
 
 class TileConfig$Delegate extends TileConfig {
@@ -31,7 +43,7 @@ class TileConfig$Delegate extends TileConfig {
 
 class TileConfig$Factory {
   const TileConfig$Factory();
-  TileConfig call({
+  TileConfig$Impl call({
     required Widget? Function() title,
     required Widget? Function() subtitle,
   }) =>
@@ -41,7 +53,7 @@ class TileConfig$Factory {
           subtitle: subtitle,
         ),
       );
-  TileConfig create({
+  TileConfig$Impl create({
     required Widget? Function() title,
     required Widget? Function() subtitle,
   }) =>
@@ -51,7 +63,7 @@ class TileConfig$Factory {
           subtitle: subtitle,
         ),
       );
-  TileConfig data({
+  TileConfig$Impl data({
     Widget? title,
     Widget? subtitle,
   }) =>
@@ -75,11 +87,18 @@ extension TileConfig$Ext$Mk on Mk {
   TileConfig$Factory get TileConfig => tileConfig$Factory;
 }
 
-class CrudListPageControl$Data<V> {
+abstract class CrudListPageControl$IData<V> {
+  TileConfig Function(int index, V item) get tile;
+  void Function(BuildContext context, int index) get onTap;
+  V Function() get create;
+  HasData<PrxCollectionBase$IData<List<V>>> Function() get items;
+}
+
+class CrudListPageControl$Data<V> implements CrudListPageControl$IData<V> {
   final TileConfig Function(int index, V item) tile;
   final void Function(BuildContext context, int index) onTap;
   final V Function() create;
-  final PrxCollectionBase<List<V>> Function() items;
+  final HasData<PrxCollectionBase$IData<List<V>>> Function() items;
   CrudListPageControl$Data({
     required this.tile,
     required this.onTap,
@@ -88,13 +107,23 @@ class CrudListPageControl$Data<V> {
   });
 }
 
-class CrudListPageControl$Impl<V> extends CrudListPageControl<V> {
-  final CrudListPageControl$Data<V> _data;
-  CrudListPageControl$Impl(this._data);
-  TileConfig tile(int index, V item) => _data.tile(index, item);
-  void onTap(BuildContext context, int index) => _data.onTap(context, index);
-  V create() => _data.create();
-  PrxCollectionBase<List<V>> get items => _data.items();
+class CrudListPageControl$Impl<V> extends CrudListPageControl<V>
+    implements HasData<CrudListPageControl$IData<V>> {
+  final CrudListPageControl$IData<V> data$;
+  CrudListPageControl$Impl(this.data$);
+  TileConfig tile(int index, V item) => data$.tile(index, item);
+  void onTap(BuildContext context, int index) => data$.onTap(context, index);
+  V create() => data$.create();
+  HasData<PrxCollectionBase$IData<List<V>>> get items => data$.items();
+}
+
+typedef ICrudListPageControl<V> = HasData<CrudListPageControl$IData<V>>;
+
+extension ICrudListPageControl$Ext<V> on ICrudListPageControl<V> {
+  TileConfig tile(int index, V item) => data$.tile(index, item);
+  void onTap(BuildContext context, int index) => data$.onTap(context, index);
+  V create() => data$.create();
+  HasData<PrxCollectionBase$IData<List<V>>> get items => data$.items();
 }
 
 class CrudListPageControl$Delegate<V> extends CrudListPageControl<V> {
@@ -104,16 +133,16 @@ class CrudListPageControl$Delegate<V> extends CrudListPageControl<V> {
   void onTap(BuildContext context, int index) =>
       _delegate().onTap(context, index);
   V create() => _delegate().create();
-  PrxCollectionBase<List<V>> get items => _delegate().items;
+  HasData<PrxCollectionBase$IData<List<V>>> get items => _delegate().items;
 }
 
 class CrudListPageControl$Factory {
   const CrudListPageControl$Factory();
-  CrudListPageControl<V> call<V>({
+  CrudListPageControl$Impl<V> call<V>({
     required TileConfig Function(int index, V item) tile,
     required void Function(BuildContext context, int index) onTap,
     required V Function() create,
-    required PrxCollectionBase<List<V>> Function() items,
+    required HasData<PrxCollectionBase$IData<List<V>>> Function() items,
   }) =>
       CrudListPageControl$Impl(
         CrudListPageControl$Data(
@@ -123,11 +152,11 @@ class CrudListPageControl$Factory {
           items: items,
         ),
       );
-  CrudListPageControl<V> create<V>({
+  CrudListPageControl$Impl<V> create<V>({
     required TileConfig Function(int index, V item) tile,
     required void Function(BuildContext context, int index) onTap,
     required V Function() create,
-    required PrxCollectionBase<List<V>> Function() items,
+    required HasData<PrxCollectionBase$IData<List<V>>> Function() items,
   }) =>
       CrudListPageControl$Impl(
         CrudListPageControl$Data(
@@ -137,11 +166,11 @@ class CrudListPageControl$Factory {
           items: items,
         ),
       );
-  CrudListPageControl<V> data<V>({
+  CrudListPageControl$Impl<V> data<V>({
     required TileConfig Function(int index, V item) tile,
     required void Function(BuildContext context, int index) onTap,
     required V Function() create,
-    required PrxCollectionBase<List<V>> items,
+    required HasData<PrxCollectionBase$IData<List<V>>> items,
   }) =>
       CrudListPageControl$Impl(
         CrudListPageControl$Data(
