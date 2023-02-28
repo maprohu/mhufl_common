@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:mhudart_common/mhdart_common.dart';
 import 'package:mhufl_common/mhufl_common.dart';
 
+part 'widgets.g.dart';
+
+@Conf([
+  RadioListTile,
+  Text,
+])
+class _GenerateWidgetConfs {}
+
 typedef ValueBuilder<T> = Widget Function(BuildContext context, T value);
 
 class NullWidget extends StatelessWidget {
@@ -180,6 +188,7 @@ class IconWidget extends StatelessWidget {
 
 class WidgetWithKey extends StatelessWidget {
   final Widget child;
+
   WidgetWithKey(dynamic key, this.child) : super(key: ValueKey(key));
 
   @override
@@ -188,8 +197,6 @@ class WidgetWithKey extends StatelessWidget {
   }
 }
 
-
 extension MhuWidgetX on Widget {
   Widget withKey(dynamic key) => WidgetWithKey(key, this);
-
 }

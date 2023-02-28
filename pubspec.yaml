@@ -14,8 +14,6 @@ dependencies:
   logging: ^1.1.1
   retry: ^3.1.0
   rxdart: ^0.27.7
-  mhudart_base:
-    path: ../mhudart_base
   mhudart_common:
     path: ../mhudart_common
   shared_preferences: ^2.0.17
