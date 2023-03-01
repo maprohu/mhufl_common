@@ -12,12 +12,28 @@ abstract class CrudSwitch$IData {
 }
 
 class CrudSwitch$Data implements CrudSwitch$IData {
-  final HasData<RxVar$IData<bool>> Function() rxVar;
-  final String Function() label;
   CrudSwitch$Data({
     required this.rxVar,
     required this.label,
   });
+  final HasData<RxVar$IData<bool>> Function() rxVar;
+  final String Function() label;
+  CrudSwitch$Data copyWith({
+    HasData<RxVar$IData<bool>> Function()? rxVar,
+    String Function()? label,
+  }) =>
+      CrudSwitch$Data(
+        rxVar: rxVar ?? this.rxVar,
+        label: label ?? this.label,
+      );
+  CrudSwitch$Data copyWithOpt({
+    HasData<RxVar$IData<bool>> Function()? rxVar,
+    String Function()? label,
+  }) =>
+      CrudSwitch$Data(
+        rxVar: rxVar ?? this.rxVar,
+        label: label ?? this.label,
+      );
 }
 
 class CrudSwitch$Impl extends CrudSwitch implements HasData<CrudSwitch$IData> {
@@ -108,14 +124,34 @@ abstract class CrudButton$IData {
 }
 
 class CrudButton$Data implements CrudButton$IData {
-  final String Function() label;
-  final HasData<RxVal$IData<String>> Function() subtitle;
-  final HasData<RxVal$IData<void Function(BuildContext)?>> Function() onTap;
   CrudButton$Data({
     required this.label,
     required this.subtitle,
     required this.onTap,
   });
+  final String Function() label;
+  final HasData<RxVal$IData<String>> Function() subtitle;
+  final HasData<RxVal$IData<void Function(BuildContext)?>> Function() onTap;
+  CrudButton$Data copyWith({
+    String Function()? label,
+    HasData<RxVal$IData<String>> Function()? subtitle,
+    HasData<RxVal$IData<void Function(BuildContext)?>> Function()? onTap,
+  }) =>
+      CrudButton$Data(
+        label: label ?? this.label,
+        subtitle: subtitle ?? this.subtitle,
+        onTap: onTap ?? this.onTap,
+      );
+  CrudButton$Data copyWithOpt({
+    String Function()? label,
+    HasData<RxVal$IData<String>> Function()? subtitle,
+    HasData<RxVal$IData<void Function(BuildContext)?>> Function()? onTap,
+  }) =>
+      CrudButton$Data(
+        label: label ?? this.label,
+        subtitle: subtitle ?? this.subtitle,
+        onTap: onTap ?? this.onTap,
+      );
 }
 
 class CrudButton$Impl extends CrudButton implements HasData<CrudButton$IData> {
@@ -217,12 +253,28 @@ abstract class CrudMapPage$IData<V> {
 }
 
 class CrudMapPage$Data<V> implements CrudMapPage$IData<V> {
-  final HasData<RxVal$IData<Opt<List<Widget>>>> Function() items;
-  final void Function(BuildContext) Function() onAdd;
   CrudMapPage$Data({
     required this.items,
     required this.onAdd,
   });
+  final HasData<RxVal$IData<Opt<List<Widget>>>> Function() items;
+  final void Function(BuildContext) Function() onAdd;
+  CrudMapPage$Data<V> copyWith({
+    HasData<RxVal$IData<Opt<List<Widget>>>> Function()? items,
+    void Function(BuildContext) Function()? onAdd,
+  }) =>
+      CrudMapPage$Data(
+        items: items ?? this.items,
+        onAdd: onAdd ?? this.onAdd,
+      );
+  CrudMapPage$Data<V> copyWithOpt({
+    HasData<RxVal$IData<Opt<List<Widget>>>> Function()? items,
+    void Function(BuildContext) Function()? onAdd,
+  }) =>
+      CrudMapPage$Data(
+        items: items ?? this.items,
+        onAdd: onAdd ?? this.onAdd,
+      );
 }
 
 class CrudMapPage$Impl<V> extends CrudMapPage<V>

@@ -12,12 +12,28 @@ abstract class CrdMsg$IData {
 }
 
 class CrdMsg$Data implements CrdMsg$IData {
-  final Crud Function() crud;
-  final PdMsg<CrdMsg, CrdFld, CrdEnum> Function() msg;
   CrdMsg$Data({
     required this.crud,
     required this.msg,
   });
+  final Crud Function() crud;
+  final PdMsg<CrdMsg, CrdFld, CrdEnum> Function() msg;
+  CrdMsg$Data copyWith({
+    Crud Function()? crud,
+    PdMsg<CrdMsg, CrdFld, CrdEnum> Function()? msg,
+  }) =>
+      CrdMsg$Data(
+        crud: crud ?? this.crud,
+        msg: msg ?? this.msg,
+      );
+  CrdMsg$Data copyWithOpt({
+    Crud Function()? crud,
+    PdMsg<CrdMsg, CrdFld, CrdEnum> Function()? msg,
+  }) =>
+      CrdMsg$Data(
+        crud: crud ?? this.crud,
+        msg: msg ?? this.msg,
+      );
 }
 
 class CrdMsg$Impl extends CrdMsg implements HasData<CrdMsg$IData> {
@@ -93,12 +109,28 @@ abstract class CrdFld$IData {
 }
 
 class CrdFld$Data implements CrdFld$IData {
-  final Crud Function() crud;
-  final PdFld<CrdMsg, CrdFld, CrdEnum> Function() fld;
   CrdFld$Data({
     required this.crud,
     required this.fld,
   });
+  final Crud Function() crud;
+  final PdFld<CrdMsg, CrdFld, CrdEnum> Function() fld;
+  CrdFld$Data copyWith({
+    Crud Function()? crud,
+    PdFld<CrdMsg, CrdFld, CrdEnum> Function()? fld,
+  }) =>
+      CrdFld$Data(
+        crud: crud ?? this.crud,
+        fld: fld ?? this.fld,
+      );
+  CrdFld$Data copyWithOpt({
+    Crud Function()? crud,
+    PdFld<CrdMsg, CrdFld, CrdEnum> Function()? fld,
+  }) =>
+      CrdFld$Data(
+        crud: crud ?? this.crud,
+        fld: fld ?? this.fld,
+      );
 }
 
 class CrdFld$Impl extends CrdFld implements HasData<CrdFld$IData> {
@@ -174,12 +206,28 @@ abstract class CrdEnum$IData {
 }
 
 class CrdEnum$Data implements CrdEnum$IData {
-  final Crud Function() crud;
-  final PdEnum<CrdMsg, CrdFld, CrdEnum> Function() enm;
   CrdEnum$Data({
     required this.crud,
     required this.enm,
   });
+  final Crud Function() crud;
+  final PdEnum<CrdMsg, CrdFld, CrdEnum> Function() enm;
+  CrdEnum$Data copyWith({
+    Crud Function()? crud,
+    PdEnum<CrdMsg, CrdFld, CrdEnum> Function()? enm,
+  }) =>
+      CrdEnum$Data(
+        crud: crud ?? this.crud,
+        enm: enm ?? this.enm,
+      );
+  CrdEnum$Data copyWithOpt({
+    Crud Function()? crud,
+    PdEnum<CrdMsg, CrdFld, CrdEnum> Function()? enm,
+  }) =>
+      CrdEnum$Data(
+        crud: crud ?? this.crud,
+        enm: enm ?? this.enm,
+      );
 }
 
 class CrdEnum$Impl extends CrdEnum implements HasData<CrdEnum$IData> {
@@ -258,16 +306,40 @@ abstract class CrxField$IData<T>
 }
 
 class CrxField$Data<T> implements CrxField$IData<T> {
-  final Opt<T> Function() get;
-  final CrdFld Function() crd;
-  final Stream<Opt<T>> Function() changes;
-  final Lookup Function() lookup;
   CrxField$Data({
     required this.get,
     required this.crd,
     required this.changes,
     required this.lookup,
   });
+  final Opt<T> Function() get;
+  final CrdFld Function() crd;
+  final Stream<Opt<T>> Function() changes;
+  final Lookup Function() lookup;
+  CrxField$Data<T> copyWith({
+    Opt<T> Function()? get,
+    CrdFld Function()? crd,
+    Stream<Opt<T>> Function()? changes,
+    Lookup Function()? lookup,
+  }) =>
+      CrxField$Data(
+        get: get ?? this.get,
+        crd: crd ?? this.crd,
+        changes: changes ?? this.changes,
+        lookup: lookup ?? this.lookup,
+      );
+  CrxField$Data<T> copyWithOpt({
+    Opt<T> Function()? get,
+    CrdFld Function()? crd,
+    Stream<Opt<T>> Function()? changes,
+    Lookup Function()? lookup,
+  }) =>
+      CrxField$Data(
+        get: get ?? this.get,
+        crd: crd ?? this.crd,
+        changes: changes ?? this.changes,
+        lookup: lookup ?? this.lookup,
+      );
 }
 
 class CrxField$Impl<T> extends CrxField<T>
@@ -400,7 +472,9 @@ extension CrxField$Ext$Mk on Mk {
 
 abstract class CrxCollectionField$IData<T>
     implements PrxCollectionBase$IData<T>, CrxField$IData<T> {
-  void Function(void Function(T) updates) get rebuild;
+  void Function(
+    void Function(T) updates,
+  ) get rebuild;
   Opt<T> Function() get get;
   Stream<Opt<T>> Function() get changes;
   Lookup Function() get lookup;
@@ -408,11 +482,6 @@ abstract class CrxCollectionField$IData<T>
 }
 
 class CrxCollectionField$Data<T> implements CrxCollectionField$IData<T> {
-  final void Function(void Function(T) updates) rebuild;
-  final Opt<T> Function() get;
-  final Stream<Opt<T>> Function() changes;
-  final Lookup Function() lookup;
-  final CrdFld Function() crd;
   CrxCollectionField$Data({
     required this.rebuild,
     required this.get,
@@ -420,13 +489,57 @@ class CrxCollectionField$Data<T> implements CrxCollectionField$IData<T> {
     required this.lookup,
     required this.crd,
   });
+  final void Function(
+    void Function(T) updates,
+  ) rebuild;
+  final Opt<T> Function() get;
+  final Stream<Opt<T>> Function() changes;
+  final Lookup Function() lookup;
+  final CrdFld Function() crd;
+  CrxCollectionField$Data<T> copyWith({
+    void Function(
+      void Function(T) updates,
+    )?
+        rebuild,
+    Opt<T> Function()? get,
+    Stream<Opt<T>> Function()? changes,
+    Lookup Function()? lookup,
+    CrdFld Function()? crd,
+  }) =>
+      CrxCollectionField$Data(
+        rebuild: rebuild ?? this.rebuild,
+        get: get ?? this.get,
+        changes: changes ?? this.changes,
+        lookup: lookup ?? this.lookup,
+        crd: crd ?? this.crd,
+      );
+  CrxCollectionField$Data<T> copyWithOpt({
+    void Function(
+      void Function(T) updates,
+    )?
+        rebuild,
+    Opt<T> Function()? get,
+    Stream<Opt<T>> Function()? changes,
+    Lookup Function()? lookup,
+    CrdFld Function()? crd,
+  }) =>
+      CrxCollectionField$Data(
+        rebuild: rebuild ?? this.rebuild,
+        get: get ?? this.get,
+        changes: changes ?? this.changes,
+        lookup: lookup ?? this.lookup,
+        crd: crd ?? this.crd,
+      );
 }
 
 class CrxCollectionField$Impl<T> extends CrxCollectionField<T>
     implements HasData<CrxCollectionField$IData<T>> {
   final CrxCollectionField$IData<T> data$;
   CrxCollectionField$Impl(this.data$);
-  void rebuild(void Function(T) updates) => data$.rebuild(updates);
+  void rebuild(
+    void Function(T) updates,
+  ) =>
+      data$.rebuild(updates);
   Opt<T> get() => data$.get();
   Stream<Opt<T>> get changes => data$.changes();
   Lookup get lookup => data$.lookup();
@@ -439,7 +552,10 @@ extension ICrxCollectionField$Ext<T> on ICrxCollectionField<T> {
   PrxCollectionBase$Impl<T> get asPrxCollectionBase =>
       PrxCollectionBase$Impl(data$);
   CrxField$Impl<T> get asCrxField => CrxField$Impl(data$);
-  void rebuild(void Function(T) updates) => data$.rebuild(updates);
+  void rebuild(
+    void Function(T) updates,
+  ) =>
+      data$.rebuild(updates);
   Opt<T> get() => data$.get();
   Stream<Opt<T>> get changes => data$.changes();
   Lookup get lookup => data$.lookup();
@@ -449,7 +565,10 @@ extension ICrxCollectionField$Ext<T> on ICrxCollectionField<T> {
 class CrxCollectionField$Delegate<T> extends CrxCollectionField<T> {
   final CrxCollectionField<T> Function() _delegate;
   CrxCollectionField$Delegate(this._delegate);
-  void rebuild(void Function(T) updates) => _delegate().rebuild(updates);
+  void rebuild(
+    void Function(T) updates,
+  ) =>
+      _delegate().rebuild(updates);
   Opt<T> get() => _delegate().get();
   Stream<Opt<T>> get changes => _delegate().changes;
   Lookup get lookup => _delegate().lookup;
@@ -459,7 +578,10 @@ class CrxCollectionField$Delegate<T> extends CrxCollectionField<T> {
 class CrxCollectionField$Factory {
   const CrxCollectionField$Factory();
   CrxCollectionField$Impl<T> call<T>({
-    required void Function(void Function(T) updates) rebuild,
+    required void Function(
+      void Function(T) updates,
+    )
+        rebuild,
     required Opt<T> Function() get,
     required Stream<Opt<T>> Function() changes,
     required Lookup Function() lookup,
@@ -475,7 +597,10 @@ class CrxCollectionField$Factory {
         ),
       );
   CrxCollectionField$Impl<T> create<T>({
-    required void Function(void Function(T) updates) rebuild,
+    required void Function(
+      void Function(T) updates,
+    )
+        rebuild,
     required Opt<T> Function() get,
     required Stream<Opt<T>> Function() changes,
     required Lookup Function() lookup,
@@ -491,7 +616,10 @@ class CrxCollectionField$Factory {
         ),
       );
   CrxCollectionField$Impl<T> data<T>({
-    required void Function(void Function(T) updates) rebuild,
+    required void Function(
+      void Function(T) updates,
+    )
+        rebuild,
     required Opt<T> Function() get,
     required Stream<Opt<T>> changes,
     required Lookup lookup,
@@ -536,7 +664,10 @@ class CrxCollectionField$Factory {
       );
   CrxCollectionField$Impl<T> fromCrxField$Iface<T>({
     required CrxField<T> crxField,
-    required void Function(void Function(T) updates) rebuild,
+    required void Function(
+      void Function(T) updates,
+    )
+        rebuild,
   }) =>
       create(
         get: crxField.get,
@@ -547,7 +678,10 @@ class CrxCollectionField$Factory {
       );
   CrxCollectionField$Impl<T> fromCrxField<T>({
     required ICrxField<T> crxField,
-    required void Function(void Function(T) updates) rebuild,
+    required void Function(
+      void Function(T) updates,
+    )
+        rebuild,
   }) =>
       create(
         get: crxField.data$.get,
@@ -567,7 +701,9 @@ extension CrxCollectionField$Ext$Mk on Mk {
 
 abstract class CrxSingleField$IData<T>
     implements PrxSingleBase$IData<T>, CrxField$IData<T> {
-  void Function(Opt<T> value) get set;
+  void Function(
+    Opt<T> value,
+  ) get set;
   Opt<T> Function() get get;
   Stream<Opt<T>> Function() get changes;
   Lookup Function() get lookup;
@@ -575,11 +711,6 @@ abstract class CrxSingleField$IData<T>
 }
 
 class CrxSingleField$Data<T> implements CrxSingleField$IData<T> {
-  final void Function(Opt<T> value) set;
-  final Opt<T> Function() get;
-  final Stream<Opt<T>> Function() changes;
-  final Lookup Function() lookup;
-  final CrdFld Function() crd;
   CrxSingleField$Data({
     required this.set,
     required this.get,
@@ -587,13 +718,57 @@ class CrxSingleField$Data<T> implements CrxSingleField$IData<T> {
     required this.lookup,
     required this.crd,
   });
+  final void Function(
+    Opt<T> value,
+  ) set;
+  final Opt<T> Function() get;
+  final Stream<Opt<T>> Function() changes;
+  final Lookup Function() lookup;
+  final CrdFld Function() crd;
+  CrxSingleField$Data<T> copyWith({
+    void Function(
+      Opt<T> value,
+    )?
+        set,
+    Opt<T> Function()? get,
+    Stream<Opt<T>> Function()? changes,
+    Lookup Function()? lookup,
+    CrdFld Function()? crd,
+  }) =>
+      CrxSingleField$Data(
+        set: set ?? this.set,
+        get: get ?? this.get,
+        changes: changes ?? this.changes,
+        lookup: lookup ?? this.lookup,
+        crd: crd ?? this.crd,
+      );
+  CrxSingleField$Data<T> copyWithOpt({
+    void Function(
+      Opt<T> value,
+    )?
+        set,
+    Opt<T> Function()? get,
+    Stream<Opt<T>> Function()? changes,
+    Lookup Function()? lookup,
+    CrdFld Function()? crd,
+  }) =>
+      CrxSingleField$Data(
+        set: set ?? this.set,
+        get: get ?? this.get,
+        changes: changes ?? this.changes,
+        lookup: lookup ?? this.lookup,
+        crd: crd ?? this.crd,
+      );
 }
 
 class CrxSingleField$Impl<T> extends CrxSingleField<T>
     implements HasData<CrxSingleField$IData<T>> {
   final CrxSingleField$IData<T> data$;
   CrxSingleField$Impl(this.data$);
-  void set(Opt<T> value) => data$.set(value);
+  void set(
+    Opt<T> value,
+  ) =>
+      data$.set(value);
   Opt<T> get() => data$.get();
   Stream<Opt<T>> get changes => data$.changes();
   Lookup get lookup => data$.lookup();
@@ -605,7 +780,10 @@ typedef ICrxSingleField<T> = HasData<CrxSingleField$IData<T>>;
 extension ICrxSingleField$Ext<T> on ICrxSingleField<T> {
   PrxSingleBase$Impl<T> get asPrxSingleBase => PrxSingleBase$Impl(data$);
   CrxField$Impl<T> get asCrxField => CrxField$Impl(data$);
-  void set(Opt<T> value) => data$.set(value);
+  void set(
+    Opt<T> value,
+  ) =>
+      data$.set(value);
   Opt<T> get() => data$.get();
   Stream<Opt<T>> get changes => data$.changes();
   Lookup get lookup => data$.lookup();
@@ -615,7 +793,10 @@ extension ICrxSingleField$Ext<T> on ICrxSingleField<T> {
 class CrxSingleField$Delegate<T> extends CrxSingleField<T> {
   final CrxSingleField<T> Function() _delegate;
   CrxSingleField$Delegate(this._delegate);
-  void set(Opt<T> value) => _delegate().set(value);
+  void set(
+    Opt<T> value,
+  ) =>
+      _delegate().set(value);
   Opt<T> get() => _delegate().get();
   Stream<Opt<T>> get changes => _delegate().changes;
   Lookup get lookup => _delegate().lookup;
@@ -625,7 +806,10 @@ class CrxSingleField$Delegate<T> extends CrxSingleField<T> {
 class CrxSingleField$Factory {
   const CrxSingleField$Factory();
   CrxSingleField$Impl<T> call<T>({
-    required void Function(Opt<T> value) set,
+    required void Function(
+      Opt<T> value,
+    )
+        set,
     required Opt<T> Function() get,
     required Stream<Opt<T>> Function() changes,
     required Lookup Function() lookup,
@@ -641,7 +825,10 @@ class CrxSingleField$Factory {
         ),
       );
   CrxSingleField$Impl<T> create<T>({
-    required void Function(Opt<T> value) set,
+    required void Function(
+      Opt<T> value,
+    )
+        set,
     required Opt<T> Function() get,
     required Stream<Opt<T>> Function() changes,
     required Lookup Function() lookup,
@@ -657,7 +844,10 @@ class CrxSingleField$Factory {
         ),
       );
   CrxSingleField$Impl<T> data<T>({
-    required void Function(Opt<T> value) set,
+    required void Function(
+      Opt<T> value,
+    )
+        set,
     required Opt<T> Function() get,
     required Stream<Opt<T>> changes,
     required Lookup lookup,
@@ -702,7 +892,10 @@ class CrxSingleField$Factory {
       );
   CrxSingleField$Impl<T> fromCrxField$Iface<T>({
     required CrxField<T> crxField,
-    required void Function(Opt<T> value) set,
+    required void Function(
+      Opt<T> value,
+    )
+        set,
   }) =>
       create(
         get: crxField.get,
@@ -713,7 +906,10 @@ class CrxSingleField$Factory {
       );
   CrxSingleField$Impl<T> fromCrxField<T>({
     required ICrxField<T> crxField,
-    required void Function(Opt<T> value) set,
+    required void Function(
+      Opt<T> value,
+    )
+        set,
   }) =>
       create(
         get: crxField.data$.get,
