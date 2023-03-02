@@ -18,6 +18,9 @@ class TileConfig$Data implements TileConfig$IData {
   });
   final Widget? Function() title;
   final Widget? Function() subtitle;
+}
+
+extension TileConfig$Data$Ext on TileConfig$Data {
   TileConfig$Data copyWith({
     Widget? Function()? title,
     Widget? Function()? subtitle,
@@ -133,6 +136,9 @@ class CrudListPageControl$Data<V> implements CrudListPageControl$IData<V> {
   ) onTap;
   final V Function() create;
   final HasData<PrxCollectionBase$IData<List<V>>> Function() items;
+}
+
+extension CrudListPageControl$Data$Ext<V> on CrudListPageControl$Data<V> {
   CrudListPageControl$Data<V> copyWith({
     TileConfig Function(
       int index,

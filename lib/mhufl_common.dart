@@ -8,4 +8,5 @@ export 'src/config.dart';
 export 'src/layout.dart';
 export 'src/dialog.dart';
 export 'src/crud/crud.dart';
+export 'src/crud/crud_ovr.dart';
 export 'src/crud/crud_widgets.dart';

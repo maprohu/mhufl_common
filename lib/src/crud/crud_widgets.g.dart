@@ -18,6 +18,9 @@ class CrudSwitch$Data implements CrudSwitch$IData {
   });
   final HasData<RxVar$IData<bool>> Function() rxVar;
   final String Function() label;
+}
+
+extension CrudSwitch$Data$Ext on CrudSwitch$Data {
   CrudSwitch$Data copyWith({
     HasData<RxVar$IData<bool>> Function()? rxVar,
     String Function()? label,
@@ -132,6 +135,9 @@ class CrudButton$Data implements CrudButton$IData {
   final String Function() label;
   final HasData<RxVal$IData<String>> Function() subtitle;
   final HasData<RxVal$IData<void Function(BuildContext)?>> Function() onTap;
+}
+
+extension CrudButton$Data$Ext on CrudButton$Data {
   CrudButton$Data copyWith({
     String Function()? label,
     HasData<RxVal$IData<String>> Function()? subtitle,
@@ -259,6 +265,9 @@ class CrudMapPage$Data<V> implements CrudMapPage$IData<V> {
   });
   final HasData<RxVal$IData<Opt<List<Widget>>>> Function() items;
   final void Function(BuildContext) Function() onAdd;
+}
+
+extension CrudMapPage$Data$Ext<V> on CrudMapPage$Data<V> {
   CrudMapPage$Data<V> copyWith({
     HasData<RxVal$IData<Opt<List<Widget>>>> Function()? items,
     void Function(BuildContext) Function()? onAdd,

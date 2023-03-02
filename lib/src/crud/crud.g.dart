@@ -18,6 +18,9 @@ class CrdMsg$Data implements CrdMsg$IData {
   });
   final Crud Function() crud;
   final PdMsg<CrdMsg, CrdFld, CrdEnum> Function() msg;
+}
+
+extension CrdMsg$Data$Ext on CrdMsg$Data {
   CrdMsg$Data copyWith({
     Crud Function()? crud,
     PdMsg<CrdMsg, CrdFld, CrdEnum> Function()? msg,
@@ -115,6 +118,9 @@ class CrdFld$Data implements CrdFld$IData {
   });
   final Crud Function() crud;
   final PdFld<CrdMsg, CrdFld, CrdEnum> Function() fld;
+}
+
+extension CrdFld$Data$Ext on CrdFld$Data {
   CrdFld$Data copyWith({
     Crud Function()? crud,
     PdFld<CrdMsg, CrdFld, CrdEnum> Function()? fld,
@@ -212,6 +218,9 @@ class CrdEnum$Data implements CrdEnum$IData {
   });
   final Crud Function() crud;
   final PdEnum<CrdMsg, CrdFld, CrdEnum> Function() enm;
+}
+
+extension CrdEnum$Data$Ext on CrdEnum$Data {
   CrdEnum$Data copyWith({
     Crud Function()? crud,
     PdEnum<CrdMsg, CrdFld, CrdEnum> Function()? enm,
@@ -316,6 +325,9 @@ class CrxField$Data<T> implements CrxField$IData<T> {
   final CrdFld Function() crd;
   final Stream<Opt<T>> Function() changes;
   final Lookup Function() lookup;
+}
+
+extension CrxField$Data$Ext<T> on CrxField$Data<T> {
   CrxField$Data<T> copyWith({
     Opt<T> Function()? get,
     CrdFld Function()? crd,
@@ -496,6 +508,9 @@ class CrxCollectionField$Data<T> implements CrxCollectionField$IData<T> {
   final Stream<Opt<T>> Function() changes;
   final Lookup Function() lookup;
   final CrdFld Function() crd;
+}
+
+extension CrxCollectionField$Data$Ext<T> on CrxCollectionField$Data<T> {
   CrxCollectionField$Data<T> copyWith({
     void Function(
       void Function(T) updates,
@@ -725,6 +740,9 @@ class CrxSingleField$Data<T> implements CrxSingleField$IData<T> {
   final Stream<Opt<T>> Function() changes;
   final Lookup Function() lookup;
   final CrdFld Function() crd;
+}
+
+extension CrxSingleField$Data$Ext<T> on CrxSingleField$Data<T> {
   CrxSingleField$Data<T> copyWith({
     void Function(
       Opt<T> value,

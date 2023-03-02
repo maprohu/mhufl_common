@@ -15,21 +15,13 @@ class CrdKey<T> extends KeyOf<IRxVar<Opt<T>>> {
   const CrdKey();
 }
 
-class TileDefaults {}
-
-typedef CrudFieldTileCustomizer = Widget Function<T>(
-    CrdFld fld, IPrxBase<T> prx, TileDefaults defaults);
-
-typedef CrudFieldTileOverrides = CrudFieldTileCustomizer? Function(
-    FieldIndex index);
-
 class Crud {
   final PmLib lib;
-  final CrudFieldTileOverrides? tileOverrides;
+  final CrudOverrides? overrides;
 
   Crud(
     this.lib, {
-    this.tileOverrides,
+    this.overrides,
   });
 
   late final root = mk.PdRoot.create<CrdMsg, CrdFld, CrdEnum>(
@@ -72,7 +64,7 @@ abstract class CrdMsg extends CrdItem
     nested: (p) => p.payload.pmMsg.nestedMessages$[msg.index],
   );
 
-  late final pmMsgOfType = pmMsg as PmMessageOfType<dynamic, dynamic>;
+  late final pmMsgOfType = pmMsg as PmMessageOfType<dynamic>;
 
   late final emptyMessage = pmMsgOfType.emptyMessage$;
 
@@ -92,8 +84,8 @@ abstract class CrdMsg extends CrdItem
     (e) => e.when(
       top: (top) => <T>(rxVar) => top.payload.crudTileFromVar(rxVar),
       oneof: (oneof) {
-        final of =
-            pmMsgOfType.oneofs$[oneof.index] as PmTypedOneOf<dynamic, Enum>;
+        final of = pmMsgOfType.oneofs$[oneof.index]
+            as PmOneofOfMessageOfType<dynamic, Enum>;
         final label = oneof.name.camelCaseToLabel;
         final values = of.values();
         final caseLabels =
@@ -187,9 +179,9 @@ abstract class CrdFld extends CrdItem
   late final name = fld.name;
   late final label = name.camelCaseToLabel;
 
-  late final pmFldRead = pmFld as PmFieldRead;
-  late final pmFldFull = pmFld as PmFieldFull;
-  late final pmFldMessage = pmFld as PmFieldMessage;
+  late final pmFldRead = pmFld as PmReadField;
+  late final pmFldFull = pmFld as PmFullField;
+  late final pmFldMessage = pmFld as PmMsgField;
 
   late final PmAccessRead$Base access = () {
     if (fld.isCollection) {
@@ -227,15 +219,28 @@ abstract class CrdFld extends CrdItem
 
   Widget crudTileFromVar<T>(IRxVarDefault<T> rxVar) => crudTile(prx(rxVar));
 
-  late final Widget Function<T>(IPrxBase<T> prx) crudTile = crud.tileOverrides
-          ?.call(fld.fieldIndex)
-          ?.let((fn) => <T>(prx) => fn(this, prx, TileDefaults())) ??
+  late final fieldOverride = crud.overrides?.field?.call(fld.globalIndex);
+
+  late final tileOverride = fieldOverride?.tile;
+
+  late final mapKeyOverride = fieldOverride?.takeIfType<IMapKeyFldOverrides>();
+
+  // late final foreignKeyOverride =
+
+  late final Widget Function<T>(IPrxBase<T> prx) crudTile = tileOverride?.let(
+        (fn) => <T>(prx) => fn(this, prx),
+      ) ??
       defaultCrudTile;
 
   late final Widget Function<T>(IPrxBase<T> prx) defaultCrudTile =
       fld.cardinality.when(
     single: () => <T>(prx) {
       prx as IPrxSingleBase<T>;
+
+      void mapKeyType() {
+
+      }
+
       return fld.valueType.when(
         boolType: () => _boolTile(prx.castOptVar<bool>()),
         stringType: () => _stringTile(prx.castOptVar<String>()),
