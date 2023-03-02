@@ -301,7 +301,7 @@ class MapKeyFldOverrides$Factory {
   }) =>
       create(
         tile: fldOverrides.tile,
-        foreignKey: foreignKey,
+        foreignKey: foreignKey(),
       );
   MapKeyFldOverrides$Impl fromFldOverrides({
     required IFldOverrides fldOverrides,
