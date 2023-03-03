@@ -12,7 +12,7 @@ typedef ForeignKey<K, V> = IPrxCollectionBase<Map<K, V>> Function(CrdFld fld, IP
 
 @Impl.data()
 abstract class CrudOverrides {
-  FldOvr<IFldOverrides> get field;
+  FldOvr<FldOverrides> get field;
 }
 
 @Impl.data()
@@ -20,7 +20,7 @@ abstract class FldOverrides {
   CrudFieldTileCustomizer? get tile;
 }
 
-@Impl.data([FldOverrides])
+@Impl.data()
 abstract class MapKeyFldOverrides implements FldOverrides {
   ForeignKey? get foreignKey;
 }

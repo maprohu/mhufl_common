@@ -223,7 +223,7 @@ abstract class CrdFld extends CrdItem
 
   late final tileOverride = fieldOverride?.tile;
 
-  late final mapKeyOverride = fieldOverride?.takeIfType<IMapKeyFldOverrides>();
+  late final mapKeyOverride = fieldOverride?.takeIfType<MapKeyFldOverrides>();
 
   // late final foreignKeyOverride =
 
@@ -473,7 +473,7 @@ abstract class CrdEnum extends CrdItem
 //   I get crd => ctx.item;
 // }
 
-@Impl([RxVal, PrxBase])
+@Impl()
 abstract class CrxField<T> implements RxVal<Opt<T>>, PrxBase<T> {
   CrdFld get crd;
 }
@@ -482,11 +482,11 @@ extension ICrxFieldX<T> on ICrxField<T> {
   Widget crudTile() => crd.crudTile(this);
 }
 
-@Impl([PrxCollectionBase, CrxField])
+@Impl()
 abstract class CrxCollectionField<T>
     implements CrxField<T>, PrxCollectionBase<T> {}
 
-@Impl([PrxSingleBase, CrxField])
+@Impl()
 abstract class CrxSingleField<T> implements CrxField<T>, PrxSingleBase<T> {}
 
 extension CrxFieldX<T> on ICrxField<T> {
