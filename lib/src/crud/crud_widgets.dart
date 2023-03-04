@@ -8,7 +8,7 @@ import '../widgets.dart';
 
 part 'crud_widgets.g.dart';
 
-@Impl()
+@Impl.data()
 abstract class CrudSwitch extends StatelessWidget {
   IRxVar<bool> get rxVar;
 
@@ -41,7 +41,7 @@ extension RxVarOptBoolXCrudSwitch on IRxVar<Opt<bool>> {
   CrudSwitch crudSwitch(String label) => orDefaultVar(false).crudSwitch(label);
 }
 
-@Impl()
+@Impl.data()
 abstract class CrudButton extends StatelessWidget {
   String get label;
 
@@ -63,7 +63,7 @@ abstract class CrudButton extends StatelessWidget {
   }
 }
 
-@Impl()
+@Impl.data()
 abstract class CrudMapPage<V> extends StatelessWidget {
   RxValImplOpt<List<Widget>> get items;
 
