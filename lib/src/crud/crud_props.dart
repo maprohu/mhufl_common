@@ -1,12 +1,10 @@
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
 import 'package:kt_dart/kt.dart';
 import 'package:mhudart_common/mhdart_common.dart';
-import 'package:mhufl_common/mhufl_common.dart';
-import 'package:mhufl_common/src/crud/crud_control.dart';
-import 'package:protobuf/protobuf.dart';
-import 'package:select_dialog/select_dialog.dart';
+import '../dialog.dart';
+import '../rx.dart';
 
+import 'crud_field.dart';
 
 class StringViewProperty extends StatelessWidget {
   final String label;
@@ -45,8 +43,8 @@ class StringViewProperty extends StatelessWidget {
   }
 
   static StringViewProperty scalar(
-      ICrxSingleField<String> prop,
-      ) =>
+    ICrxSingleField<String> prop,
+  ) =>
       rx(
         label: prop.name.camelCaseToLabel,
         rx: prop.orEmptyVar(),
