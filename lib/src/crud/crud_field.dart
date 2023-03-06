@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:kt_dart/kt.dart';
 import 'package:mhudart_common/mhdart_common.dart';
 import 'package:mhufl_common/mhufl_common.dart';
-import 'package:mhufl_common/src/crud/crud_control.dart';
 import 'package:protobuf/protobuf.dart';
 import 'package:select_dialog/select_dialog.dart';
 
@@ -13,6 +12,17 @@ part 'crud_field.g.dart';
 @Impl()
 abstract class CrdFld extends CrdItem
     implements HasPdFld<CrdMsg, CrdFld, CrdEnum> {
+  static final defaultCrfn = mk.CrfnFld.create(
+    tileWidget: <T>(fld, prx) => fld.defaultCrudTile(prx),
+    tileConfig: <I, T>(fld, id, prx) => mk.TileConfig.fromDisplayStrings(
+      prx: prx,
+      title: (value) => fld.singleItemDisplayString(id, value),
+      subtitle: fld.singleItemDisplaySubString?.let(
+        (sub) => (value) => sub(fld, value),
+      ),
+    ),
+  );
+
   late final pmFld = fld.msg.payload.pmMsgOfType.fields$[fld.index];
   late final name = fld.name;
   late final label = name.camelCaseToLabel;
@@ -33,18 +43,18 @@ abstract class CrdFld extends CrdItem
   }();
 
   late final IPrxBase Function<T>(
-      IRxVarDefault<T> messageVar,
-      ) prx = access.when(
+    IRxVarDefault<T> messageVar,
+  ) prx = access.when(
     read: (read) => <T>(messageVar) => mk.PrxCollectionBase.fromFieldRebuilder(
-      rxVar: messageVar,
-      field: read,
-      rebuild: castProtoRebuilder,
-    ),
+          rxVar: messageVar,
+          field: read,
+          rebuild: castProtoRebuilder,
+        ),
     full: (full) => <T>(messageVar) => mk.PrxSingleBase.fromFieldRebuilder(
-      rxVar: messageVar,
-      field: full,
-      rebuild: castProtoRebuilder,
-    ),
+          rxVar: messageVar,
+          field: full,
+          rebuild: castProtoRebuilder,
+        ),
   );
 
   late final dynamic Function() defaultSingleValue = fld.singleValueType.when(
@@ -55,58 +65,79 @@ abstract class CrdFld extends CrdItem
     message: (message) => (value) => message.ensure(value),
   );
 
-  Widget crudTileFromVar<T>(IRxVarDefault<T> rxVar) => crudTile(prx(rxVar));
+  Widget tileWidgetFromVar<T>(IRxVarDefault<T> rxVar) => tileWidget(prx(rxVar));
 
-  late final fieldOverride = crud.overrides?.field?.call(fld.globalIndex);
+  late final crfn = crud.crfn.field.call(fld.globalIndex);
 
-  late final tileOverride = fieldOverride?.tile;
+  TileConfig tileConfig<I, T>(I id, IPrxBase<T> prx) =>
+      crfn.tileConfig(this, id, prx);
 
-  late final mapKeyOverride = fieldOverride?.takeIfType<MapKeyFldOverrides>();
+  Widget tileWidget<T>(IPrxBase<T> prx) => crfn.tileWidget(this, prx);
 
-  // late final foreignKeyOverride =
+  late final IPrxCollectionBase<Map<K, V>> Function<K, V>(IPrxBase<K> prx)?
+      foreignKey = crfnMapKey?.foreignKey?.let(
+    (fk) => <K, V>(prx) => fk(this, prx),
+  );
 
-  late final Widget Function<T>(IPrxBase<T> prx) crudTile = tileOverride?.let(
-        (fn) => <T>(prx) => fn(this, prx),
-  ) ??
-      defaultCrudTile;
+  late final crfnMapKey = crfn.takeIfType<CrfnMapKeyFld>();
+
+  Widget Function<T>(IPrxBase<T> prx) _defaultSingleCrudTile() {
+    Widget Function<T>(IPrxBase<T> prx) stringOrInt(
+      Widget Function<T>(IPrxBase<T> prx) Function() noForeignKey,
+    ) {
+      final fk = foreignKey;
+      if (fk == null) {
+        return noForeignKey();
+      } else {
+        return _foreignKeyTile();
+      }
+    }
+
+    return fld.valueType.when(
+      boolType: () => <T>(prx) => _boolTile(
+            prx.cast<IPrxSingleBase<T>>().castOptVar<bool>(),
+          ),
+      stringType: () => stringOrInt(
+        () => <T>(prx) => _stringTile(
+              prx.cast<IPrxSingleBase<T>>().castOptVar<String>(),
+            ),
+      ),
+      intType: () => stringOrInt(
+        () => <T>(prx) => _intTile(
+              prx.cast<IPrxSingleBase<T>>().castOptVar<int>(),
+            ),
+      ),
+      enumType: (enumType) => <T>(prx) => _enumTile(
+            enumType.payload,
+            prx.cast<IPrxSingleBase<T>>().castOptVar<ProtobufEnum>(),
+          ),
+      messageType: (messageType) => <T>(prx) => _messageTile(
+            messageType.payload,
+            prx.cast<IPrxSingleBase<T>>(),
+          ),
+    );
+  }
 
   late final Widget Function<T>(IPrxBase<T> prx) defaultCrudTile =
-  fld.cardinality.when(
-    single: () => <T>(prx) {
-      prx as IPrxSingleBase<T>;
-
-      void mapKeyType() {
-
-      }
-
-      return fld.valueType.when(
-        boolType: () => _boolTile(prx.castOptVar<bool>()),
-        stringType: () => _stringTile(prx.castOptVar<String>()),
-        intType: () => _intTile(prx.castOptVar<int>()),
-        enumType: (enumType) => _enumTile(
-          enumType.payload,
-          prx.castOptVar<ProtobufEnum>(),
-        ),
-        messageType: (messageType) => _messageTile(messageType.payload, prx),
-      );
-    },
+      fld.cardinality.when(
+    single: _defaultSingleCrudTile,
     mapOf: (mapOf) => <T>(prx) => _intMapButton(
-      (prx as IPrxCollectionBase<T>).castPrx<Map<int, dynamic>>(),
-      mapOf.value.payload,
-    ),
+          (prx as IPrxCollectionBase<T>).castPrx<Map<int, dynamic>>(),
+          mapOf.value.payload,
+        ),
     repeated: () => <T>(prx) => _listButton(
-      prx: (prx as IPrxCollectionBase<T>).castPrx<List<dynamic>>(),
-      create: defaultSingleValue,
-    ),
+          prx: (prx as IPrxCollectionBase<T>).castPrx<List<dynamic>>(),
+          create: defaultSingleValue,
+        ),
   );
 
   Widget _messageTile<T>(CrdMsg msg, RxVarImplOpt<T> prx) {
     return Column(
       children: msg
           .fieldTilesFor(
-        rxVar: prx,
-        defaultValue: Opt.here(msg.emptyMessage),
-      )
+            rxVar: prx,
+            defaultValue: Opt.here(msg.emptyMessage),
+          )
           .toList(),
     );
   }
@@ -140,16 +171,15 @@ abstract class CrdFld extends CrdItem
   }
 
   Widget _stringTile(RxVarImplOpt<String> prx) {
-    final rx = prx.orDefaultVar('<not set>');
     return mk.CrudButton.data(
-      subtitle: rx,
+      subtitle: prx.orDefault('<not set>'),
       onTap: mk.RxVar.variable((context) {
         StringDialogEditor(
           title: label,
-          setter: rx.set,
+          setter: prx.setHere,
         ).show(
           context,
-          rx.value,
+          prx.value.orDefault(''),
         );
       }),
       label: label,
@@ -178,9 +208,9 @@ abstract class CrdFld extends CrdItem
   }
 
   Widget _intMapButton<V>(
-      IPrxCollectionBase<Map<int, V>> prxMap,
-      CrdFld valueField,
-      ) {
+    IPrxCollectionBase<Map<int, V>> prxMap,
+    CrdFld valueField,
+  ) {
     return mk.CrudButton.data(
       label: label,
       subtitle: prxMap
@@ -201,14 +231,15 @@ abstract class CrdFld extends CrdItem
   }
 
   Widget _intMapPage<V>(
-      IPrxCollectionBase<Map<int, V>> prx,
-      CrdFld valueField,
-      ) {
+    IPrxCollectionBase<Map<int, V>> prx,
+    CrdFld valueField,
+  ) {
     return valueField.fld.valueType.when(
       messageType: (msg) {
         return _intMapPage2(
-          prx,
-              (context, e) {
+          msg: msg.payload,
+          prx: prx,
+          onTap: (context, e) {
             final rxVar = prx.item(e.id);
             msg.payload.showCrudPage(
               context: context,
@@ -216,29 +247,35 @@ abstract class CrdFld extends CrdItem
               actionsBar: NullWidget(),
             );
           },
-              (key) => msg.payload.emptyMessage,
+          create: (key) => msg.payload.emptyMessage,
         );
       },
     );
   }
 
-  Widget _intMapPage2<V>(
-      IPrxCollectionBase<Map<int, V>> prx,
-      void Function(BuildContext context, IntId<V> e) onTap,
-      V Function(int key) create,
-      ) {
+  Widget _intMapPage2<V>({
+    required CrdMsg msg,
+    required IPrxCollectionBase<Map<int, V>> prx,
+    required void Function(BuildContext context, IntId<V> e) onTap,
+    required V Function(int key) create,
+  }) {
     return mk.CrudMapPage.data(
       items: prx.mapOpt(
-            (value) => value
+        (value) => value
             .withIds()
             .map(
               (e) => Builder(builder: (context) {
-            return ListTile(
-              title: Text(e.id.toString()),
-              onTap: () => onTap(context, e),
-            );
-          }),
-        )
+                return ListTile(
+                  title: Text(
+                    msg.displayTitleString(
+                      e.id,
+                      e.value,
+                    ),
+                  ),
+                  onTap: () => onTap(context, e),
+                );
+              }),
+            )
             .toList(),
       ),
       onAdd: (context) {
@@ -267,9 +304,10 @@ abstract class CrdFld extends CrdItem
           CrudListPage(
             control: mk.CrudListPageControl.data(
               items: prx,
-              tile: (index, item) => mk.TileConfig.data(
-                title: Text(index.toString()),
-              ),
+              tile: (index, item) {
+                final itemPrx = prx.item(index);
+                return singleItemTileConfig(index, itemPrx);
+              },
               create: create,
               onTap: (context, index) {
                 final rxVar = prx.item(index);
@@ -282,17 +320,36 @@ abstract class CrdFld extends CrdItem
     );
   }
 
-  late final void Function<V>(BuildContext context, RxVarImplOpt<V> rxVar)
-  singleItemTap = fld.singleValueType.when(
-    messageType: (messageType) =>
-    <V>(context, rxVar) => messageType.payload.showCrudPage(
-      context: context,
-      rxVar: rxVar,
-      actionsBar: NullWidget(),
+  late final TileConfig Function<I, T>(I id, IRxVar<Opt<T>> prx)
+      singleItemTileConfig = fld.singleValueType.when(
+    messageType: (msg) =>
+        <I, T>(id, value) => msg.payload.tileConfig(id, value),
+  );
+
+  late final String Function<I, T>(I id, T value) singleItemDisplayString =
+      fld.singleValueType.when(
+    messageType: (msg) =>
+        <I, T>(id, value) => msg.payload.displayTitleString(id, value),
+  );
+
+  late final String Function<I, T>(I id, T value)? singleItemDisplaySubString =
+      fld.singleValueType.when(
+    messageType: (msg) => msg.payload.crfn.displaySubtitleString?.let(
+      (sub) => <I, T>(id, value) => sub(msg.payload, id, value),
     ),
+    valueType: () => null,
+  );
+
+  late final void Function<V>(BuildContext context, RxVarImplOpt<V> rxVar)
+      singleItemTap = fld.singleValueType.when(
+    messageType: (messageType) =>
+        <V>(context, rxVar) => messageType.payload.showCrudPage(
+              context: context,
+              rxVar: rxVar,
+              actionsBar: NullWidget(),
+            ),
   );
 }
-
 
 @Impl()
 abstract class CrxField<T> implements RxVal<Opt<T>>, PrxBase<T> {
@@ -300,7 +357,7 @@ abstract class CrxField<T> implements RxVal<Opt<T>>, PrxBase<T> {
 }
 
 extension ICrxFieldX<T> on ICrxField<T> {
-  Widget crudTile() => crd.crudTile(this);
+  Widget crudTile() => crd.tileWidget(this);
 }
 
 @Impl()

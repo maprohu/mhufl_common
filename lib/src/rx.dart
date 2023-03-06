@@ -4,7 +4,6 @@ import 'package:mhudart_common/mhdart_common.dart';
 
 import 'widgets.dart';
 
-
 class RxBuilder<T> extends StatelessWidget {
   final Widget Function(BuildContext context, T value) builder;
   final IRxVal<T> stream;
@@ -47,6 +46,12 @@ extension RxValWidgetX<T> on IRxVal<T> {
 
 extension RxValStringWidgetX on IRxVal<String> {
   Widget rxText() => RxText(this);
+}
+
+extension RxValOptStringWidgetX on IRxVal<Opt<String>> {
+  Widget rxTextOrNull() => rxBuilderOrNull(
+        (context, value) => Text(value),
+      );
 }
 
 extension StreamStringWidgetX on Stream<String> {
@@ -109,6 +114,10 @@ extension OptWidgetRxValWidgetX<T> on IRxVal<Opt<Widget>> {
           here: Functions.identity,
           gone: () => const NullWidget(),
         ),
+      );
+
+  Widget rxOrNull() => rxBuilderOrNull(
+        (context, value) => value,
       );
 }
 

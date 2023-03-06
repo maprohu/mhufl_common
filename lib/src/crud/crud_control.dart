@@ -1,11 +1,36 @@
 import 'package:flutter/cupertino.dart';
+import 'package:kt_dart/kt.dart';
 import 'package:mhudart_common/mhdart_common.dart';
+import 'package:mhufl_common/mhufl_common.dart';
+
 part 'crud_control.g.dart';
-@Impl()
+
+@Impl.data()
 abstract class TileConfig {
   Widget? get title;
 
   Widget? get subtitle;
+
+}
+
+extension TileConfigFactorX on TileConfig$Factory {
+  TileConfig$Impl fromDisplayStrings<I, T>({
+    required IRxVal<Opt<T>> prx,
+    required String Function(T value) title,
+    required String Function(T value)? subtitle,
+  }) =>
+      create(
+        title: prx.rxBuilderOrNull(
+          (context, value) => Text(
+            title(value),
+          ),
+        ),
+        subtitle: subtitle?.let(
+          (subtitle) => prx.mapOpt<Widget>(
+            (value) => Text(subtitle(value)),
+          ).rxOrNull(),
+        ),
+      );
 }
 
 @Impl()
@@ -29,5 +54,4 @@ abstract class CrudListPageControl<V> {
     });
     return index;
   }
-
 }
