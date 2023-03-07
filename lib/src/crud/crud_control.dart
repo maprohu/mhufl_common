@@ -35,7 +35,7 @@ extension TileConfigFactorX on TileConfig$Factory {
 
 @Impl()
 abstract class CrudListPageControl<V> {
-  IPrxCollectionBase<List<V>> get items;
+  IPrxCollectionOfType<List<V>> get items;
 
   TileConfig tile(int index, V item);
 

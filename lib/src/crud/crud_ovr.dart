@@ -1,36 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:mhudart_common/mhdart_common.dart';
 import 'package:mhufl_common/src/crud/crud_control.dart';
+import 'package:protobuf/protobuf.dart';
 
 import 'crud.dart';
 import 'crud_field.dart';
 import 'crud_message.dart';
+import 'field/crdt.dart';
 
 part 'crud_ovr.g.dart';
 
-typedef FieldTileWidgetProvider = Widget Function<T>(
-  CrdFld fld,
-  IPrxBase<T> prx,
+typedef FieldTileWidgetProvider<M extends GeneratedMessage, F> = Widget Function(
+  CrdtFld<M, F> fld,
+  IPrxOfType<F> prx,
 );
 
-typedef MessageTileConfigProvider = TileConfig Function<I, T>(
-  CrdMsg msg,
+typedef MessageTileConfigProvider<M extends GeneratedMessage> = TileConfig Function<I>(
+  CrdtMsg<M> msg,
   I id,
-  IRxVar<Opt<T>> prx,
+  IRxVal<Opt<M>> prx,
 );
 
-typedef FieldTileConfigProvider = TileConfig Function<I, T>(
-  CrdFld fld,
+typedef FieldTileConfigProvider<M extends GeneratedMessage, F> = TileConfig Function<I>(
+  CrdtFld<M, F> fld,
   I id,
-  IPrxBase<T> prx,
+  IPrxOfType<F> prx,
 );
 
-typedef MessageStringDisplay = String Function<I, T>(CrdMsg msg, I id, T value);
+typedef MessageStringDisplay<M extends GeneratedMessage> = String Function<I>(
+    CrdtMsg<M> msg, I id, M value);
 
 typedef GlobalIndexLookup<T> = T Function(int globalIndex);
 
-typedef ForeignKey = IPrxCollectionBase<Map<K, V>> Function<K, V>(
-    CrdFld fld, IPrxBase<K> prx);
+typedef ForeignKey<M extends GeneratedMessage, K, V>
+    = IPrxCollectionFieldOfType<Map<K, V>> Function(
+  CrdtFldMap<M, K, V> fld,
+  IPrxOfType<K> prx,
+);
 
 /// [ICrfnCrud]
 @Impl.data()
@@ -38,33 +44,52 @@ abstract class CrfnCrud {
   GlobalIndexLookup<CrfnFld> get field;
 
   GlobalIndexLookup<CrfnMsg> get message;
+}
 
+@Impl.data()
+abstract class CrfnMsg<M extends GeneratedMessage> {
+  MessageStringDisplay<M> get displayString;
+
+  MessageStringDisplay<M> get displayTitleString;
+
+  MessageStringDisplay<M>? get displaySubtitleString;
+
+  MessageTileConfigProvider<M> get tileConfig;
 }
 
 /// [ICrfnFld]
 @Impl.data()
-abstract class CrfnFld {
-  FieldTileWidgetProvider get tileWidget;
+abstract class CrfnFld<M extends GeneratedMessage, F> {
+  FieldTileWidgetProvider<M, F> get tileWidget;
 
-  FieldTileConfigProvider get tileConfig;
+  FieldTileConfigProvider<M, F> get tileConfig;
 }
 
 @Impl.data()
-abstract class CrfnMsg {
-  MessageStringDisplay get displayString;
-
-  MessageStringDisplay get displayTitleString;
-
-  MessageStringDisplay? get displaySubtitleString;
-
-  MessageTileConfigProvider get tileConfig;
-}
-
-@Impl.data()
-abstract class CrfnMapKeyFld implements CrfnFld {
-  ForeignKey? get foreignKey;
+abstract class CrfnMapKeyFld<M extends GeneratedMessage, K, V> implements CrfnFld<M, Map<K, V>> {
+  ForeignKey<M, K, V>? get foreignKey;
 }
 
 extension CrdOvrStringX on String {
   String orId<I>(I id) => orIfEmpty(() => id.toString().paren);
+}
+
+extension CrfnMapKeyFldFactoryX on CrfnMapKeyFld$Factory {
+  CrfnMapKeyFld$Impl<M, K, V> castOrCreateFromFld<M extends GeneratedMessage, K, V>(CrfnFld base) =>
+      base.castOrCreate(
+        () => fromCrfnFld(
+          crfnFld: (base as CrfnFld<M, Map<K, V>>).toImpl,
+        ),
+      );
+}
+
+extension CrfnFldX on CrfnFld {
+  CrfnMapKeyFld<M, K, V> toMapKey<M extends GeneratedMessage, K, V>() =>
+      mk.CrfnMapKeyFld.castOrCreateFromFld(this);
+
+  CrfnFld<M, F> castCrfn<M extends GeneratedMessage, F>() => cast();
+}
+
+extension CrfnMsgX on CrfnMsg {
+  CrfnMsg<M> castCrfn<M extends GeneratedMessage>() => cast();
 }

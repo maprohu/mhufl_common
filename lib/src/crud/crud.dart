@@ -19,11 +19,24 @@ class CrdKey<T> extends KeyOf<IRxVar<Opt<T>>> {
 abstract class Crud {
   PmLib get lib;
 
-  CrfnCrud get crfn;
+  CrfnCrud Function(Crud self) get crfnProvider;
 
-  static final defaultCrfn = mk.CrfnCrud.create(
-    message: CrdMsg.defaultCrfn.asConstant1(),
-    field: CrdFld.defaultCrfn.asConstant1(),
+  late final crfn = crfnProvider(this);
+
+  late final allMessages = lib.allMessages.toList(growable: false);
+  late final allFields = lib.allFields.toList(growable: false);
+
+  late final Cache<int, CrdMsg> messageByGlobalIndex = Cache(
+    (index) => resolveMessage(allMessages[index]),
+  );
+
+  late final Cache<int, CrdFld> fieldByGlobalIndex = Cache(
+    (index) => resolveField(allFields[index]),
+  );
+
+  late final defaultCrfn = mk.CrfnCrud.create(
+    message: (idx) => messageByGlobalIndex(idx).defaultCrfn,
+    field: (idx) => fieldByGlobalIndex(idx).defaultCrfn,
   );
 
   late final root = mk.PdRoot.create<CrdMsg, CrdFld, CrdEnum>(
@@ -42,29 +55,30 @@ abstract class Crud {
     (field) => resolveMessage(field.message).msg.fields[field.index].payload,
   );
 
-  CrxSingleField$Impl<T> crxSingle<T>(IPrxSingleOfType<T, dynamic> prx) =>
-      mk.CrxSingleField.fromPrxSingleBase(
-        prxSingleBase: prx,
+  CrxSingleField$Impl<T> crxSingle<T>(IPrxSingleFieldOfType<T> prx) =>
+      mk.CrxSingleField.fromPrxSingleOfType(
+        prxSingleOfType: prx,
         crd: resolveField.get(prx.field()).asConstant(),
       );
 
-  CrxCollectionField$Impl<T> crxCollection<T>(IPrxCollection<T, dynamic> prx) =>
-      mk.CrxCollectionField.fromPrxCollectionBase(
-        prxCollectionBase: prx,
+  CrxCollectionField$Impl<T> crxCollection<T>(
+          IPrxCollectionFieldOfType<T> prx) =>
+      mk.CrxCollectionField.fromPrxCollectionOfType(
+        prxCollectionOfType: prx,
         crd: resolveField.get(prx.field()).asConstant(),
       );
 }
 
-extension ICrudX on ICrud {
-  Crud$Impl override(CrfnCrud Function(CrfnCrud crfn) ovr) => copyWith(
-        crfn: ovr(crfn),
+extension CrudX on Crud {
+  Crud$Impl override(Override<CrfnCrud> ovr) => copyWith(
+        crfnProvider: (crud) => ovr(crfn),
       );
 }
 
 extension CrudFactoryX on Crud$Factory {
   Crud fromLib(PmLib lib, [Override<CrfnCrud>? crfn]) => create(
         lib: lib,
-        crfn: Crud.defaultCrfn,
+        crfnProvider: (crud) => crud.defaultCrfn,
       ).let(
         (c) =>
             crfn?.let(
@@ -85,4 +99,12 @@ abstract class CrdEnum extends CrdItem
     root: (root) => crud.lib.enums[enm.index],
     msg: (msg) => msg.payload.pmMsg.nestedEnums$[enm.index],
   );
+}
+
+extension MapFieldsX on MapFields<CrdMsg, CrdFld, CrdEnum> {
+  R keyValueType<R>(R Function<K, V>() fn) => key.payload.pmFld.type$(
+        <KT>() => value.payload.pmFld.type$(
+          <VT>() => fn<KT, VT>(),
+        ),
+      );
 }

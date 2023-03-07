@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kt_dart/kt.dart';
 import 'package:mhudart_common/mhdart_common.dart';
 import 'package:mhufl_common/src/crud/crud_control.dart';
+import 'package:protobuf/protobuf.dart';
 import 'package:select_dialog/select_dialog.dart';
 
 import '../rx.dart';
@@ -15,67 +16,69 @@ part 'crud_message.g.dart';
 @Impl()
 abstract class CrdMsg extends CrdItem
     implements HasPdMsg<CrdMsg, CrdFld, CrdEnum> {
-  static final defaultCrfn = mk.CrfnMsg.create(
-    displayString: <I, T>(msg, id, value) => '($id)',
-    displayTitleString: <I, T>(msg, id, value) => msg.displayString(id, value),
-    displaySubtitleString: null,
-    tileConfig: <I, T>(msg, id, prx) => mk.TileConfig.fromDisplayStrings(
-      prx: prx,
-      title: (value) => msg.displayTitleString(id, value),
-      subtitle: msg.displaySubtitleString?.let(
-        (sub) => (value) => sub(id, value),
-      ),
-    ),
-  );
-
-  late final path = msg.path.toList(growable: false);
-
   late final PmMessage pmMsg = msg.messageLevel.when(
     top: (r) => crud.lib.messages[msg.index],
     nested: (p) => p.payload.pmMsg.nestedMessages$[msg.index],
   );
 
-  late final crfn = crud.crfn.message.call(msg.globalIndex);
+  late final path = msg.path.toList(growable: false);
 
-  String displayString<I, T>(I id, T value) =>
-      crfn.displayString(this, id, value);
-
-  String displayTitleString<I, T>(I id, T value) =>
-      crfn.displayTitleString(this, id, value);
-
-  Widget tileConfigDisplayStringTitle<I, T>(I id, IRxVal<Opt<T>> value) => value
-      .mapOpt<String>(
-        (value) => displayTitleString(id, value),
-  )
-      .rxTextOrNull();
-
-  late final String Function<I, T>(I id, T value)? displaySubtitleString =
-      crfn.displaySubtitleString?.let(
-    (sub) => <I, T>(I id, T value) => sub(this, id, value),
+  late final CrdtMsg crdt = pmMsg.type$(
+    <M extends GeneratedMessage>() => CrdtMsg<M>(this),
   );
 
-  TileConfig tileConfig<I, T>(I id, IRxVar<Opt<T>> prx) =>
-      crfn.tileConfig(this, id, prx);
-
-  late final pmMsgOfType = pmMsg as PmMessageOfType<dynamic>;
-
-  late final emptyMessage = pmMsgOfType.emptyMessage$;
+  late final defaultCrfn = crdt.defaultCrfn;
 
   late final name = msg.name;
   late final label = name.camelCaseToLabel;
+}
 
-  Iterable<Widget> fieldTilesFor<T>({
-    required RxVarImplOpt<T> rxVar,
-    Opt<T> defaultValue = const Opt.gone(),
-  }) =>
-      fieldTiles.map(
-        (e) => e(rxVar.withDefault(defaultValue)),
-      );
+class CrdtMsg<M extends GeneratedMessage> {
+  final CrdMsg crd;
 
-  late final Iterable<Widget Function<T>(IRxVarDefault<T> rxVar)> fieldTiles =
+  CrdtMsg(this.crd);
+
+  late final CrfnMsg<M> defaultCrfn = mk.CrfnMsg.create<M>(
+    displayString: <I>(msg, id, value) => '($id)',
+    displayTitleString: <I>(msg, id, value) => msg.displayString(id, value),
+    displaySubtitleString: null,
+    tileConfig: <I>(msg, id, prx) => mk.TileConfig.fromDisplayStrings<I, M>(
+      prx: prx,
+      title: (value) => displayTitleString(id, value),
+      subtitle: displaySubtitleString?.let(
+        (sub) => (value) => sub(id, value),
+      ),
+    ),
+  );
+
+  late final crud = crd.crud;
+  late final msg = crd.msg;
+
+  late final crfn = crud.crfn.message.call(msg.globalIndex) as CrfnMsg<M>;
+
+  late final pmMsgOfType = crd.pmMsg as PmMessageOfType<M>;
+  late final emptyMessage = pmMsgOfType.emptyMessage$;
+
+  String displayString<I>(I id, M value) => crfn.displayString(this, id, value);
+
+  String displayTitleString<I>(I id, M value) =>
+      crfn.displayTitleString(this, id, value);
+
+  Widget tileConfigDisplayStringTitle<I>(I id, IRxVal<Opt<M>> value) => value
+      .mapOpt<String>(
+        (value) => displayTitleString(id, value),
+      )
+      .rxTextOrNull();
+
+  late final String Function<I>(I id, M value)? displaySubtitleString =
+      crfn.displaySubtitleString?.let(
+    (sub) => <I>(I id, M value) => sub(this, id, value),
+  );
+
+  late final Iterable<Widget Function(IRxVarDefault<M> rxVar)> fieldTiles =
       msg.pdxs.map(
     (e) => e.when(
-      top: (top) => <T>(rxVar) => top.payload.tileWidgetFromVar(rxVar),
+      top: (top) => (rxVar) => top.payload.crdt.tileWidgetFromVar(rxVar),
       oneof: (oneof) {
         final of = pmMsgOfType.oneofs$[oneof.index]
             as PmOneofOfMessageOfType<dynamic, Enum>;
@@ -90,28 +93,28 @@ abstract class CrdMsg extends CrdItem
 
         CrdFld whichField(Enum which) => fields[which.index];
 
-        void onChange<T>(IRxVarDefault<T> rxVar, Enum which) {
+        void onChange(IRxVarDefault<M> rxVar, Enum which) {
           rxVar.rebuildCastProto(
             updates: (value) {
               if (which == notSet) {
                 of.clear(value);
               } else {
-                whichField(which).ensure(value);
+                whichField(which).crdt.ensure(value);
               }
             },
             defaultValue: rxVar.defaultValue,
           );
         }
 
-        Widget whichWidget<T>(IRxVarDefault<T> rxVar, Enum which) {
+        Widget whichWidget(IRxVarDefault<M> rxVar, Enum which) {
           if (which == notSet) {
             return const NullWidget();
           } else {
-            return whichField(which).tileWidgetFromVar(rxVar);
+            return whichField(which).crdt.tileWidgetFromVar(rxVar);
           }
         }
 
-        return <T>(rxVar) => rxVar
+        return (rxVar) => rxVar
                 .mapOpt((value) => of.which(value))
                 .rxBuilderOrNull((context, which) {
               return Column(
@@ -141,14 +144,25 @@ abstract class CrdMsg extends CrdItem
     ),
   );
 
-  void showCrudPage<T>({
+  Iterable<Widget> fieldTilesFor({
+    required RxVarImplOpt<M> rxVar,
+    Opt<M> defaultValue = const Opt.gone(),
+  }) =>
+      fieldTiles.map(
+        (e) => e(rxVar.withDefault(defaultValue)),
+      );
+
+  TileConfig tileConfig<I>(I id, IPrxOfType<M> prx) =>
+      crfn.tileConfig(this, id, prx);
+
+  void showCrudPage({
     required BuildContext context,
-    required RxVarImplOpt<T> rxVar,
+    required RxVarImplOpt<M> rxVar,
     required Widget actionsBar,
   }) {
     ScaffoldPage.show(
       context,
-      label,
+      crd.label,
       Column(
         children: [
           actionsBar,
