@@ -75,6 +75,14 @@ class CrdtMsg<M extends GeneratedMessage> {
     (sub) => <I>(I id, M value) => sub(this, id, value),
   );
 
+  Widget messageTileWidget(PrxMessage prx) {
+    final rxVar = prx as IRxVar<Opt<M>>;
+    final rxDef = mk.RxVarDefault.noDefault(rxVar);
+    return Column(
+      children: fieldTiles.map((e) => e(rxDef)).toList(),
+    );
+  }
+
   late final Iterable<Widget Function(IRxVarDefault<M> rxVar)> fieldTiles =
       msg.pdxs.map(
     (e) => e.when(
@@ -144,7 +152,7 @@ class CrdtMsg<M extends GeneratedMessage> {
     ),
   );
 
-  Iterable<Widget> fieldTilesFor({
+  Iterable<Widget> tileWidgets({
     required RxVarImplOpt<M> rxVar,
     Opt<M> defaultValue = const Opt.gone(),
   }) =>
@@ -158,7 +166,7 @@ class CrdtMsg<M extends GeneratedMessage> {
   void showCrudPage({
     required BuildContext context,
     required RxVarImplOpt<M> rxVar,
-    required Widget actionsBar,
+    Widget actionsBar = const NullWidget(),
   }) {
     ScaffoldPage.show(
       context,
@@ -168,7 +176,7 @@ class CrdtMsg<M extends GeneratedMessage> {
           actionsBar,
           SingleChildScrollView(
             child: Column(
-              children: fieldTilesFor(
+              children: tileWidgets(
                 rxVar: rxVar,
               ).toList(),
             ),

@@ -5,6 +5,7 @@ import 'package:mhufl_common/mhufl_common.dart';
 part 'widgets.g.dart';
 
 @Conf([
+  ListTile,
   RadioListTile,
   Text,
 ])

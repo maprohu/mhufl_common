@@ -1,0 +1,15 @@
+/*
+protoc -I proto --dart_out=./lib/proto proto/config.proto --descriptor_set_out=proto/generated/descriptor --include_imports
+*/
+
+syntax = "proto3";
+
+message ExampleMessage {
+  string stringProp = 1;
+  int32 defaultItem = 3;
+  map<int32, SomeItem> items = 2;
+}
+
+message SomeItem {
+  string stringProp = 1;
+}

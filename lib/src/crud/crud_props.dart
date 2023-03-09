@@ -42,13 +42,13 @@ class StringViewProperty extends StatelessWidget {
     );
   }
 
-  static StringViewProperty scalar(
-    ICrxSingleField<String> prop,
-  ) =>
-      rx(
-        label: prop.name.camelCaseToLabel,
-        rx: prop.orEmptyVar(),
-      );
+  // static StringViewProperty scalar(
+  //   ICrxSingleField<String> prop,
+  // ) =>
+  //     rx(
+  //       label: prop.name.camelCaseToLabel,
+  //       rx: prop.orEmptyVar(),
+  //     );
 }
 
 class StringDialogEditor {

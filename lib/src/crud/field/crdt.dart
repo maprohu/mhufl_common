@@ -1,9 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:kt_dart/kt.dart';
 import 'package:mhudart_common/mhdart_common.dart';
 import 'package:mhufl_common/mhufl_common.dart';
 import 'package:protobuf/protobuf.dart';
+
+import 'collection.dart';
 
 part 'crdt.g.dart';
 
@@ -14,11 +15,13 @@ abstract class CrdtFld<M extends GeneratedMessage, F> {
   late final fld = crd.fld;
   late final crud = crd.crud;
   late final label = crd.label;
+  late final name = crd.name;
 
-  static createDefaultCrfn<M extends GeneratedMessage, F>() => mk.CrfnFld.create<M, F>(
-    tileWidget: (fld, prx) => fld.defaultTileWidget(prx),
-    tileConfig: <I>(fld, id, prx) => fld.defaultTileConfig(id, prx),
-  );
+  static createDefaultCrfn<M extends GeneratedMessage, F>() =>
+      mk.CrfnFld.create<M, F>(
+        tileWidget: (fld, prx) => fld.defaultTileWidget(prx),
+        tileConfig: <I>(fld, id, prx) => fld.defaultTileConfig(id, prx),
+      );
 
   late final defaultCrfn = createDefaultCrfn<M, F>();
 
@@ -27,25 +30,27 @@ abstract class CrdtFld<M extends GeneratedMessage, F> {
   Widget defaultTileWidget(IPrxOfType<F> prx) => throw this;
 
   TileConfig defaultTileConfig<I>(
-      I id,
-      IPrxOfType<F> prx,
-      ) =>
+    I id,
+    IPrxOfType<F> prx,
+  ) =>
       mk.TileConfig.create(
         title: defaultTileConfigTitle(id, prx),
         subtitle: defaultTileConfigSubtitle(id, prx),
       );
 
   Widget? defaultTileConfigTitle<I>(
-      I id,
-      IPrxOfType<F> prx,
-      ) =>
+    I id,
+    IPrxOfType<F> prx,
+  ) =>
       throw this;
 
   Widget? defaultTileConfigSubtitle<I>(
-      I id,
-      IPrxOfType<F> prx,
-      ) =>
+    I id,
+    IPrxOfType<F> prx,
+  ) =>
       throw this;
+
+  Widget fieldTileWidget(PrxField prx) => tileWidget(prx as IPrxOfType<F>);
 
   Widget tileWidget(IPrxOfType<F> prx) => crfn.tileWidget(this, prx);
 
@@ -55,17 +60,23 @@ abstract class CrdtFld<M extends GeneratedMessage, F> {
       tileWidget(prx(messageVar));
 
   IPrxOfType<F> prx(IRxVarDefault<M> messageVar);
+
+  ListTile listTileWithFieldLabelTitle(Override<ListTile$Conf> ovr) =>
+      ListTile$Conf().let(ovr).create();
+
 }
 
-abstract class CrdtFldRead<M extends GeneratedMessage, F> extends CrdtFld<M, F> {
+abstract class CrdtFldRead<M extends GeneratedMessage, F>
+    extends CrdtFld<M, F> {
   PmReadField<M, F> get pmFld;
 }
 
-abstract class CrdtFldFull<M extends GeneratedMessage, F> extends CrdtFldRead<M, F> {
+abstract class CrdtFldFull<M extends GeneratedMessage, F>
+    extends CrdtFldRead<M, F> {
   @override
   PmFullField<M, F> get pmFld;
 
-  IPrxOfType<F> prx(IRxVarDefault<M> messageVar) =>
+  PrxSingleOfType$Impl<F> prx(IRxVarDefault<M> messageVar) =>
       mk.PrxSingleOfType.fromFieldRebuilder<M, F>(
         rxVar: messageVar,
         field: pmFld,
@@ -73,49 +84,3 @@ abstract class CrdtFldFull<M extends GeneratedMessage, F> extends CrdtFldRead<M,
       );
 }
 
-
-@Impl.data()
-abstract class CrdtFldMessage<M extends GeneratedMessage,
-F extends GeneratedMessage> extends CrdtFldFull<M, F> {
-  CrdtMsg<F> get value;
-
-  @override
-  late final PmMessageField<M, F> pmFld = crd.pmFld as PmMessageField<M, F>;
-
-  @override
-  F ensure(M message) => pmFld.ensure(message);
-}
-
-abstract class CrdtFldCollection<M extends GeneratedMessage, F> extends CrdtFldRead<M, F> {
-  IPrxOfType<F> prx(IRxVarDefault<M> messageVar) =>
-      mk.PrxCollectionOfType.fromFieldRebuilder<M, F>(
-        rxVar: messageVar,
-        field: pmFld,
-        rebuild: castProtoRebuilder,
-      );
-}
-
-@Impl.data()
-abstract class CrdtFldMap<M extends GeneratedMessage, K, V>
-    extends CrdtFldCollection<M, Map<K, V>> {
-  late final pmFld = crd.pmFld as PmMapField<M, K, V>;
-
-  late final crfnMapKey = crfn.toMapKey<M, K, V>();
-
-  late final IPrxCollectionOfType<Map>? Function(IPrxOfType<K> prx) foreignKey =
-      crfnMapKey.foreignKey?.let(
-            (fk) => (prx) => fk(this, prx),
-      ) ??
-          Functions.returnsNull1;
-}
-
-
-@Impl.data()
-abstract class CrdtFldStringMap<M extends GeneratedMessage, V>
-    extends CrdtFldMap<M, String, V> {}
-
-@Impl.data()
-abstract class CrdtFldRepeated<M extends GeneratedMessage, V>
-    extends CrdtFldCollection<M, List<V>> {
-  late final pmFld = crd.pmFld as PmRepeatedField<M, V>;
-}

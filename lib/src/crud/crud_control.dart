@@ -41,7 +41,7 @@ abstract class CrudListPageControl<V> {
 
   void onTap(BuildContext context, int index);
 
-  V create();
+  V create(int index);
 
   final ordering = mk.RxVar.variable(false);
 
@@ -49,7 +49,7 @@ abstract class CrudListPageControl<V> {
     late int index;
     items.rebuild((c) {
       index = c.length;
-      final item = create();
+      final item = create(index);
       c.add(item);
     });
     return index;

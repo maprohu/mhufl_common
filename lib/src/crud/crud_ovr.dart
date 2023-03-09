@@ -7,6 +7,7 @@ import 'crud.dart';
 import 'crud_field.dart';
 import 'crud_message.dart';
 import 'field/crdt.dart';
+import 'field/map.dart';
 
 part 'crud_ovr.g.dart';
 
@@ -34,7 +35,7 @@ typedef GlobalIndexLookup<T> = T Function(int globalIndex);
 
 typedef ForeignKey<M extends GeneratedMessage, K, V>
     = IPrxCollectionFieldOfType<Map<K, V>> Function(
-  CrdtFldMap<M, K, V> fld,
+  CrdtFld<M, K> fld,
   IPrxOfType<K> prx,
 );
 
@@ -66,26 +67,28 @@ abstract class CrfnFld<M extends GeneratedMessage, F> {
 }
 
 @Impl.data()
-abstract class CrfnMapKeyFld<M extends GeneratedMessage, K, V> implements CrfnFld<M, Map<K, V>> {
+abstract class CrfnForeignKeyFld<M extends GeneratedMessage, K, V> implements CrfnFld<M, K> {
   ForeignKey<M, K, V>? get foreignKey;
+
+  R targetType<R>(R Function<T>() fn) => fn<V>();
 }
 
 extension CrdOvrStringX on String {
   String orId<I>(I id) => orIfEmpty(() => id.toString().paren);
 }
 
-extension CrfnMapKeyFldFactoryX on CrfnMapKeyFld$Factory {
-  CrfnMapKeyFld$Impl<M, K, V> castOrCreateFromFld<M extends GeneratedMessage, K, V>(CrfnFld base) =>
+extension CrfnMapKeyFldFactoryX on CrfnForeignKeyFld$Factory {
+  CrfnForeignKeyFld$Impl<M, K, V> castOrCreateFromFld<M extends GeneratedMessage, K, V>(CrfnFld base) =>
       base.castOrCreate(
         () => fromCrfnFld(
-          crfnFld: (base as CrfnFld<M, Map<K, V>>).toImpl,
+          crfnFld: (base as CrfnFld<M, K>).toImpl,
         ),
       );
 }
 
 extension CrfnFldX on CrfnFld {
-  CrfnMapKeyFld<M, K, V> toMapKey<M extends GeneratedMessage, K, V>() =>
-      mk.CrfnMapKeyFld.castOrCreateFromFld(this);
+  CrfnForeignKeyFld<M, K, V> toForeignKey<M extends GeneratedMessage, K, V>() =>
+      mk.CrfnForeignKeyFld.castOrCreateFromFld(this);
 
   CrfnFld<M, F> castCrfn<M extends GeneratedMessage, F>() => cast();
 }

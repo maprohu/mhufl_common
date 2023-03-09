@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:kt_dart/kt.dart';
 import 'package:mhudart_common/mhdart_common.dart';
 import 'package:mhufl_common/mhufl_common.dart';
 import 'package:protobuf/protobuf.dart';
 
+import 'collection.dart';
 import 'crdt.dart';
+import 'map.dart';
 
 part 'int_map.g.dart';
 

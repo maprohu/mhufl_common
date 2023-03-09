@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:kt_dart/kt.dart';
 import 'package:mhudart_common/mhdart_common.dart';
 import 'package:mhufl_common/mhufl_common.dart';
+import 'package:protobuf/protobuf.dart';
 import 'package:select_dialog/select_dialog.dart';
 
 import 'crud_field.dart';
 import 'crud_message.dart';
 import 'crud_props.dart';
+import 'field/crdt.dart';
 
 part 'crud.g.dart';
 
@@ -21,24 +23,6 @@ abstract class Crud {
 
   CrfnCrud Function(Crud self) get crfnProvider;
 
-  late final crfn = crfnProvider(this);
-
-  late final allMessages = lib.allMessages.toList(growable: false);
-  late final allFields = lib.allFields.toList(growable: false);
-
-  late final Cache<int, CrdMsg> messageByGlobalIndex = Cache(
-    (index) => resolveMessage(allMessages[index]),
-  );
-
-  late final Cache<int, CrdFld> fieldByGlobalIndex = Cache(
-    (index) => resolveField(allFields[index]),
-  );
-
-  late final defaultCrfn = mk.CrfnCrud.create(
-    message: (idx) => messageByGlobalIndex(idx).defaultCrfn,
-    field: (idx) => fieldByGlobalIndex(idx).defaultCrfn,
-  );
-
   late final root = mk.PdRoot.create<CrdMsg, CrdFld, CrdEnum>(
     descriptorSet: FileDescriptorSet.fromJson(lib.descriptor).asConstant(),
     msgPayload: (msg) =>
@@ -51,21 +35,72 @@ abstract class Crud {
     (message) => root.resolveMessageIndex(message.path$).payload,
   );
 
+  CrdtMsg<M> resolveCrdtMsg<M extends GeneratedMessage>(
+    PmMessageOfType<M> message,
+  ) =>
+      resolveMessage(message).crdt as CrdtMsg<M>;
+
+  CrdtFld<M, F> resolveCrdtFld<M extends GeneratedMessage, F>(
+    PmFieldOfMessageOfType<M, F> message,
+  ) =>
+      resolveField(message).crdt as CrdtFld<M, F>;
+
+  late final allMessages = lib.allMessages.toList(growable: false);
+  late final allFields = lib.allFields.toList(growable: false);
+
+  late final Cache<int, CrdMsg> messageByGlobalIndex = Cache(
+    (index) => resolveMessage(allMessages[index]),
+  );
+
+  late final Cache<int, CrdFld> fieldByGlobalIndex = Cache(
+    (index) => resolveField(allFields[index]),
+  );
+
   late final Cache<HasFieldPath, CrdFld> resolveField = Cache(
     (field) => resolveMessage(field.message).msg.fields[field.index].payload,
   );
 
-  CrxSingleField$Impl<T> crxSingle<T>(IPrxSingleFieldOfType<T> prx) =>
-      mk.CrxSingleField.fromPrxSingleOfType(
-        prxSingleOfType: prx,
-        crd: resolveField.get(prx.field()).asConstant(),
-      );
+  late final defaultCrfn = mk.CrfnCrud.create(
+    message: (idx) => messageByGlobalIndex(idx).defaultCrfn,
+    field: (idx) => fieldByGlobalIndex(idx).defaultCrfn,
+  );
 
-  CrxCollectionField$Impl<T> crxCollection<T>(
-          IPrxCollectionFieldOfType<T> prx) =>
-      mk.CrxCollectionField.fromPrxCollectionOfType(
-        prxCollectionOfType: prx,
-        crd: resolveField.get(prx.field()).asConstant(),
+  late final crfn = crfnProvider(this);
+
+  //
+  // CrxMessage$Impl<M> crxMessage<M extends GeneratedMessage>(
+  //         IPrxMessageOfType<M> prx) =>
+  //     mk.CrxMessage.fromRxVar(
+  //       rxVar: prx,
+  //       crd: resolveCrdtMsg(prx.message()).asConstant(),
+  //     );
+  //
+  // CrxSingleField$Impl<T> crxSingle<T>(IPrxSingleFieldOfType<T> prx) =>
+  //     mk.CrxSingleField.fromPrxSingleOfType(
+  //       prxSingleOfType: prx,
+  //       crd: resolveField
+  //           .get(prx.field())
+  //           .crdt
+  //           .cast<CrdtFld<dynamic, T>>()
+  //           .asConstant(),
+  //     );
+  //
+  // CrxCollectionField$Impl<T> crxCollection<T>(
+  //         IPrxCollectionFieldOfType<T> prx) =>
+  //     mk.CrxCollectionField.fromPrxCollectionOfType(
+  //       prxCollectionOfType: prx,
+  //       crd: resolveField
+  //           .get(prx.field())
+  //           .crdt
+  //           .cast<CrdtFld<dynamic, T>>()
+  //           .asConstant(),
+  //     );
+
+  Widget tileWidgetFor(Prx prx) => prx.whenPrx(
+        message: (message) =>
+            resolveMessage(message.message()).crdt.messageTileWidget(message),
+        field: (field) =>
+            resolveField(field.field()).crdt.fieldTileWidget(field),
       );
 }
 
