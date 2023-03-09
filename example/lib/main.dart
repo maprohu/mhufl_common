@@ -61,9 +61,12 @@ class _ExampleAppState extends State<ExampleApp> {
 }
 
 final messageFields = ExampleLib$MessageFieldOverrides<Override<CrfnFld>>(
-  exampleMessage$$defaultItem: (o) => o.toForeignKey<ExampleMessage, int, SomeItem>().copyWith(
-    foreignKey: (fld, prx) => prx.lookup.get(exampleRootKey).items$,
-  ) ,
+  exampleMessage$$defaultItem: (o) =>
+      o.castCrfn<ExampleMessage, int>().copyWith(
+            foreignKey: mk.CrfnForeignKeyFld.create<ExampleMessage, int, SomeItem>(
+              foreignKey: (fld, prx) => prx.lookup.get(exampleRootKey).items$,
+            ),
+          ),
 ).get;
 final messages = ExampleLib$MessageOverrides<Override<CrfnMsg>>(
   someItem: (o) => o.castCrfn<SomeItem>().copyWith(

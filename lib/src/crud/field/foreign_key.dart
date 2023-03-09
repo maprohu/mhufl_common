@@ -12,20 +12,33 @@ import 'single_value.dart';
 part 'foreign_key.g.dart';
 
 @Impl.data()
-abstract class CrdtFldSingleForeignKey<M extends GeneratedMessage, F, T>
+abstract class CrdtFldSingleForeignKey<M extends GeneratedMessage, F, T extends GeneratedMessage>
     extends CrdtFldSingle<M, F> {
   ForeignKey<M, F, T> get foreignKey;
+  PmMessageOfType<T> get message;
+
+  late final messageCrdt = crud.resolveCrdtMsg(message);
 
   @override
   Widget defaultTileWidget(IPrxOfType<F> prx) {
     final source = foreignKey(this, prx);
+    final field = source.field();
+
+    final length = source.mapOpt(field.length).orDefault(0);
 
     return Builder(
       builder: (context) {
-        return NullWidget();
-      },
+        return listTileWithFieldLabelTitle(
+          (o) => o.copyWith(
+            subtitle: length.rxText((v) => v.toString()),
+            onTap: () {
+              ScaffoldPage.show(context, title, body);
+
+            },
+          ),
+        );
+      }
     );
   }
 }
 
-extension CrdtFldSingleForeignKeyFactoryX on CrdtFldSingleForeignKey$Factory {}

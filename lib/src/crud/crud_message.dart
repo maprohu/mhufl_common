@@ -27,7 +27,9 @@ abstract class CrdMsg extends CrdItem
     <M extends GeneratedMessage>() => CrdtMsg<M>(this),
   );
 
-  late final defaultCrfn = crdt.defaultCrfn;
+  late final CrfnMsg defaultCrfn = pmMsg.type$(
+    <M extends GeneratedMessage>() => CrdtMsg.createDefaultCrfn<M>(),
+  );
 
   late final name = msg.name;
   late final label = name.camelCaseToLabel;
@@ -38,18 +40,19 @@ class CrdtMsg<M extends GeneratedMessage> {
 
   CrdtMsg(this.crd);
 
-  late final CrfnMsg<M> defaultCrfn = mk.CrfnMsg.create<M>(
-    displayString: <I>(msg, id, value) => '($id)',
-    displayTitleString: <I>(msg, id, value) => msg.displayString(id, value),
-    displaySubtitleString: null,
-    tileConfig: <I>(msg, id, prx) => mk.TileConfig.fromDisplayStrings<I, M>(
-      prx: prx,
-      title: (value) => displayTitleString(id, value),
-      subtitle: displaySubtitleString?.let(
-        (sub) => (value) => sub(id, value),
-      ),
-    ),
-  );
+  static CrfnMsg<M> createDefaultCrfn<M extends GeneratedMessage>() =>
+      mk.CrfnMsg.create<M>(
+        displayString: <I>(msg, id, value) => '($id)',
+        displayTitleString: <I>(msg, id, value) => msg.displayString(id, value),
+        displaySubtitleString: null,
+        tileConfig: <I>(msg, id, prx) => mk.TileConfig.fromDisplayStrings<I, M>(
+          prx: prx,
+          title: (value) => msg.displayTitleString(id, value),
+          subtitle: msg.displaySubtitleString?.let(
+            (sub) => (value) => sub(id, value),
+          ),
+        ),
+      );
 
   late final crud = crd.crud;
   late final msg = crd.msg;

@@ -17,72 +17,36 @@ abstract class CrdtFldSingle<M extends GeneratedMessage, F>
   @override
   late final PmSingleField<M, F> pmFld = crd.pmFld as PmSingleField<M, F>;
 
-  // @override
-  // Widget defaultTileWidget(IPrxOfType<F> prx) => _defaultTileWidget(prx);
-  //
-  // late final _defaultTileWidget = defaultSingleCrudTile();
-
-  // Widget Function(IPrxOfType<F> prx) defaultSingleCrudTile() {
-  //   Widget Function(IPrxSingleOfType<T> prx) stringOrInt<K>(
-  //     Widget Function(IPrxSingleOfType<T> prx) Function() noForeignKey,
-  //   ) {
-  //     final mapKey = crfn.toForeignKey<M, T, dynamic>();
-  //     final fk = foreignKey;
-  //     if (fk == null) {
-  //       return noForeignKey();
-  //     } else {
-  //       return foreignKeyTile(foreignKey: fk);
-  //     }
-  //   }
-  //
-  //   Widget Function<T>(IPrxSingleOfType<T> prx) single = fld.valueType.when(
-  //     boolType: () => <T>(prx) => boolTile(
-  //           prx as RxVarImplOpt<bool>,
-  //         ),
-  //     stringType: () => stringOrInt<String>(
-  //       () => (prx) => stringTile(
-  //             prx as RxVarImplOpt<String>,
-  //           ),
-  //     ),
-  //     intType: () => stringOrInt(
-  //       () => <T>(prx) => intTile(
-  //             prx as RxVarImplOpt<int>,
-  //           ),
-  //     ),
-  //     enumType: (enumType) => <T>(prx) => enumTile(
-  //           enumType.payload,
-  //           prx as RxVarImplOpt<ProtobufEnum>,
-  //         ),
-  //   );
-  //
-  //   return <T>(prx) => single(prx as IPrxSingleOfType<T>);
-  // }
 }
 
 extension CrdtFldSingleFactoryX on CrdtFldSingle$Factory {
   CrdtFldSingle<M, F> from<M extends GeneratedMessage, F>(CrdFld fld) {
-    final crfnForeignKey = fld.crfn.toForeignKey();
+    final crfn = fld.crfn as ICrfnFld<M, F>;
+    final crfnForeignKey = crfn.foreignKey;
 
-    final foreignKey = crfnForeignKey.foreignKey;
-
-    if (foreignKey != null) {
+    if (crfnForeignKey != null) {
       return crfnForeignKey.targetType(
-        <T>() => mk.CrdtFldSingleForeignKey.create<M, F, T>(
-          foreignKey: foreignKey as ForeignKey<M, F, T>,
-          crd: fld,
-        ),
+        <T>() {
+          final fk = crfnForeignKey.foreignKey;
+          return mk.CrdtFldSingleForeignKey.create<M, F, T>(
+            foreignKey: fk as ForeignKey<M, F, T>,
+            crd: fld,
+          );
+        },
       );
     } else {
       final CrdtFldSingle<M, dynamic> crdt = fld.fld.valueType.when(
         boolType: () => mk.CrdtFldSingleBool.create(crd: fld),
         intType: () => mk.CrdtFldSingleInt.create(crd: fld),
         stringType: () => mk.CrdtFldSingleString.create(crd: fld),
-        enumType: (enumType) => enumType.payload.pmEnum.type$(
-          <TE extends ProtobufEnum>() => mk.CrdtFldSingleEnum.create<M, TE>(
-            enm: enumType.payload,
-            crd: fld,
-          ),
-        ),
+        enumType: (enumType) =>
+            enumType.payload.pmEnum.type$(
+              <TE extends ProtobufEnum>() =>
+                  mk.CrdtFldSingleEnum.create<M, TE>(
+                    enm: enumType.payload,
+                    crd: fld,
+                  ),
+            ),
       );
 
       return crdt as CrdtFldSingle<M, F>;
@@ -153,9 +117,7 @@ abstract class CrdtFldSingleBool<M extends GeneratedMessage>
     return boolTile(prx as RxVarImplOpt<bool>);
   }
 
-  Widget boolTile(
-    RxVarImplOpt<bool> prx,
-  ) {
+  Widget boolTile(RxVarImplOpt<bool> prx,) {
     return mk.CrudSwitch.data(
       rxVar: prx.orDefaultVar(false),
       label: label,
@@ -165,7 +127,7 @@ abstract class CrdtFldSingleBool<M extends GeneratedMessage>
 
 @Impl.data()
 abstract class CrdtFldSingleEnum<M extends GeneratedMessage,
-    F extends ProtobufEnum> extends CrdtFldSingle<M, F> {
+F extends ProtobufEnum> extends CrdtFldSingle<M, F> {
   CrdEnum get enm;
 
   late final pmEnum = enm.pmEnum as PmEnum<F>;
@@ -185,9 +147,10 @@ abstract class CrdtFldSingleEnum<M extends GeneratedMessage,
         SelectDialog.showModal<F>(
           context,
           items: enumItems,
-          itemBuilder: (context, item, isSelected) => ListTile(
-            title: Text(item.label),
-          ),
+          itemBuilder: (context, item, isSelected) =>
+              ListTile(
+                title: Text(item.label),
+              ),
           showSearchBox: false,
           onChange: (value) {
             prx.value = value.here();

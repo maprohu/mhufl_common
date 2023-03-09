@@ -60,7 +60,7 @@ abstract class Crud {
     (field) => resolveMessage(field.message).msg.fields[field.index].payload,
   );
 
-  late final defaultCrfn = mk.CrfnCrud.create(
+  late final CrfnCrud defaultCrfn = mk.CrfnCrud.create(
     message: (idx) => messageByGlobalIndex(idx).defaultCrfn,
     field: (idx) => fieldByGlobalIndex(idx).defaultCrfn,
   );

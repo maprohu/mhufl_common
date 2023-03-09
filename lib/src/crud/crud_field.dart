@@ -54,10 +54,11 @@ abstract class CrdFld extends CrdItem
     ),
   );
 
-  late final defaultCrfn = crdt.defaultCrfn;
+  late final CrfnFld defaultCrfn = pmFld.messageFieldType(
+    <M extends GeneratedMessage, F>() => CrdtFld.createDefaultCrfn<M, F>(),
+  );
 
   Widget tileWidget(IPrxOfType prx) => crdt.tileWidget(prx);
 
   late final crfn = crud.crfn.field(pmFld.globalIndex);
-
 }
