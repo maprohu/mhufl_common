@@ -52,6 +52,10 @@ class CrdtMsg<M extends GeneratedMessage> {
             (sub) => (value) => sub(id, value),
           ),
         ),
+        singleLabelWidget: <I>(msg, id, prx) => prx
+            .asImpl()
+            .mapOpt((value) => msg.displayString(id, value))
+            .rxTextOrNull(),
       );
 
   late final crud = crd.crud;
@@ -79,17 +83,20 @@ class CrdtMsg<M extends GeneratedMessage> {
   );
 
   Widget messageTileWidget(PrxMessage prx) {
-    final rxVar = prx as IRxVar<Opt<M>>;
-    final rxDef = mk.RxVarDefault.noDefault(rxVar);
+    final rxVar = prx as PrxMessageOfType<M>;
     return Column(
-      children: fieldTiles.map((e) => e(rxDef)).toList(),
+      children: fieldTiles
+          .map(
+            (widgetFn) => widgetFn(rxVar.toImpl),
+          )
+          .toList(),
     );
   }
 
-  late final Iterable<Widget Function(IRxVarDefault<M> rxVar)> fieldTiles =
+  late final Iterable<Widget Function(PrxOfMessage<M> rxVar)> fieldTiles =
       msg.pdxs.map(
     (e) => e.when(
-      top: (top) => (rxVar) => top.payload.crdt.tileWidgetFromVar(rxVar),
+      top: (top) => (rxVar) => top.payload.crdt.tileWidgetFromMessageVar(rxVar),
       oneof: (oneof) {
         final of = pmMsgOfType.oneofs$[oneof.index]
             as PmOneofOfMessageOfType<dynamic, Enum>;
@@ -104,28 +111,29 @@ class CrdtMsg<M extends GeneratedMessage> {
 
         CrdFld whichField(Enum which) => fields[which.index];
 
-        void onChange(IRxVarDefault<M> rxVar, Enum which) {
-          rxVar.rebuildCastProto(
-            updates: (value) {
-              if (which == notSet) {
-                of.clear(value);
-              } else {
-                whichField(which).crdt.ensure(value);
-              }
-            },
-            defaultValue: rxVar.defaultValue,
-          );
+        void onChange(PrxOfMessage<M> rxVar, Enum which) {
+          rxVar.asImpl().rebuildCastProto(
+                updates: (value) {
+                  if (which == notSet) {
+                    of.clear(value);
+                  } else {
+                    whichField(which).crdt.ensure(value);
+                  }
+                },
+                defaultValue: rxVar.asImpl().defaultValue.asConstant(),
+              );
         }
 
-        Widget whichWidget(IRxVarDefault<M> rxVar, Enum which) {
+        Widget whichWidget(PrxOfMessage<M> rxVar, Enum which) {
           if (which == notSet) {
             return const NullWidget();
           } else {
-            return whichField(which).crdt.tileWidgetFromVar(rxVar);
+            return whichField(which).crdt.tileWidgetFromMessageVar(rxVar);
           }
         }
 
         return (rxVar) => rxVar
+                .asImpl()
                 .mapOpt((value) => of.which(value))
                 .rxBuilderOrNull((context, which) {
               return Column(
@@ -156,19 +164,21 @@ class CrdtMsg<M extends GeneratedMessage> {
   );
 
   Iterable<Widget> tileWidgets({
-    required RxVarImplOpt<M> rxVar,
-    Opt<M> defaultValue = const Opt.gone(),
+    required PrxOfMessage<M> rxVar,
   }) =>
       fieldTiles.map(
-        (e) => e(rxVar.withDefault(defaultValue)),
+        (e) => e(rxVar),
       );
 
-  TileConfig tileConfig<I>(I id, IPrxOfType<M> prx) =>
+  TileConfig tileConfig<I>(I id, PrxOfType<M> prx) =>
       crfn.tileConfig(this, id, prx);
+
+  Widget singleLabelWidget<I>(I id, PrxOfType<M> prx) =>
+      crfn.singleLabelWidget(this, id, prx);
 
   void showCrudPage({
     required BuildContext context,
-    required RxVarImplOpt<M> rxVar,
+    required PrxOfMessage<M> rxVar,
     Widget actionsBar = const NullWidget(),
   }) {
     ScaffoldPage.show(

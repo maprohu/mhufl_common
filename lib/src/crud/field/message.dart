@@ -20,8 +20,8 @@ abstract class CrdtFldMessage<M extends GeneratedMessage,
   F ensure(M message) => pmFld.ensure(message);
 
   @override
-  Widget defaultTileWidget(IPrxOfType<F> prx) {
-    final rxVar = prx as IPrxSingleOfType<F>;
+  Widget defaultTileWidget(PrxOfType<F> prx) {
+    final rxVar = prx as PrxMessageOfType<F>;
     return Column(
       children: value
           .tileWidgets(
@@ -31,4 +31,10 @@ abstract class CrdtFldMessage<M extends GeneratedMessage,
     );
   }
 
+  @override
+  PrxMessageFieldOfMessageOfType<M, F> prx(PrxOfMessage<M> messageVar) => mk.PrxMessageFieldOfMessageOfType.fromPrxSingleFieldOfMessageOfType(
+    prxSingleFieldOfMessageOfType: super.prx(messageVar).asImpl(),
+    message: value.pmMsgOfType.asConstant(),
+    ensure: true.asConstant()
+  );
 }

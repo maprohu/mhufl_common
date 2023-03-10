@@ -13,15 +13,16 @@ part 'int_map.g.dart';
 abstract class CrdtFldIntMap<M extends GeneratedMessage, V>
     extends CrdtFldMap<M, int, V> {
   @override
-  Widget defaultTileWidget(IPrxOfType<Map<int, V>> prx) =>
-      intMapTile(prx as IPrxCollectionOfType<Map<int, V>>);
+  Widget defaultTileWidget(PrxOfType<Map<int, V>> prx) =>
+      intMapTile(prx as PrxCollectionOfType<Map<int, V>>);
 
   Widget intMapTile(
-    IPrxCollectionOfType<Map<int, V>> prxMap,
+    PrxCollectionOfType<Map<int, V>> prxMap,
   ) {
     return mk.CrudButton.data(
       label: crd.label,
       subtitle: prxMap
+          .asImpl()
           .mapOpt((value) => value.length)
           .orDefault(0)
           .map((v) => v.toString()),
@@ -38,25 +39,30 @@ abstract class CrdtFldIntMap<M extends GeneratedMessage, V>
   }
 
   late final Widget Function(
-    IPrxCollectionOfType<Map<int, V>> prx,
+    PrxCollectionOfType<Map<int, V>> prx,
   ) intMapPage = fld.valueType.when(
     messageType: (msg) => msg.payload.pmMsg.type$(
       <MT extends GeneratedMessage>() => (prx) => intMapOfMessagePage(
             msg.payload.crdt as CrdtMsg<MT>,
-            prx as IPrxCollectionOfType<Map<int, MT>>,
+            (prx as PrxCollectionOfType<Map<int, MT>>).toImpl,
           ),
     ),
   );
 
   Widget intMapOfMessagePage<MT extends GeneratedMessage>(
     CrdtMsg<MT> msg,
-    IPrxCollectionOfType<Map<int, MT>> prx,
+    PrxCollectionOfType$Impl<Map<int, MT>> prx,
   ) {
     void onTap(BuildContext context, IntId<MT> e) {
-      final rxVar = prx.item(e.id);
+      final item = prx.item(e.id);
+      final msgItem = mk.PrxOfMessage.fromPrxVarOfType(
+        prxVarOfType: item,
+        message: msg.pmMsgOfType.asConstant(),
+        ensure: false.asConstant(),
+      );
       msg.showCrudPage(
         context: context,
-        rxVar: rxVar,
+        rxVar: msgItem,
         actionsBar: NullWidget(),
       );
     }

@@ -15,18 +15,18 @@ abstract class TileConfig {
 
 extension TileConfigFactorX on TileConfig$Factory {
   TileConfig$Impl fromDisplayStrings<I, T>({
-    required IRxVal<Opt<T>> prx,
+    required RxVal<Opt<T>> prx,
     required String Function(T value) title,
     required String Function(T value)? subtitle,
   }) =>
       create(
-        title: prx.rxBuilderOrNull(
+        title: prx.asImpl().rxBuilderOrNull(
           (context, value) => Text(
             title(value),
           ),
         ),
         subtitle: subtitle?.let(
-          (subtitle) => prx.mapOpt<Widget>(
+          (subtitle) => prx.asImpl().mapOpt<Widget>(
             (value) => Text(subtitle(value)),
           ).rxOrNull(),
         ),

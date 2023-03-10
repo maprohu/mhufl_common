@@ -6,39 +6,54 @@ import 'package:protobuf/protobuf.dart';
 import 'package:select_dialog/select_dialog.dart';
 
 import '../crud_props.dart';
+import 'collection.dart';
 import 'crdt.dart';
 import 'single_value.dart';
 
 part 'foreign_key.g.dart';
 
 @Impl.data()
-abstract class CrdtFldSingleForeignKey<M extends GeneratedMessage, F, T extends GeneratedMessage>
-    extends CrdtFldSingle<M, F> {
-  ForeignKey<M, F, T> get foreignKey;
-  PmMessageOfType<T> get message;
+abstract class CrdtFldSingleForeignKey<M extends GeneratedMessage, F,
+    FM extends GeneratedMessage, FC, FV> extends CrdtFldSingle<M, F> {
+  // CrfnForeignKeyFld<M, F, FM, FV> get crfnForeignKey;
+  late final crfnForeignKey =
+      crd.crfn.foreignKey as CrfnForeignKeyFld<M, F, FM, FC, FV>;
 
-  late final messageCrdt = crud.resolveCrdtMsg(message);
+  late final foreignKey = crfnForeignKey.foreignKey;
+  late final foreignField = crfnForeignKey.field;
+
+  late final foreignMessageCrdt = crud.resolveCrdtMsg(foreignField.message);
+  late final foreignFieldCrdt =
+      crud.resolveCrdtFld(foreignField) as CrdtFldCollection<FM, FC, F, FV>;
+
+  int lengthOfField(FM foreignMessage) =>
+      foreignField.length(foreignField.get(foreignMessage));
 
   @override
-  Widget defaultTileWidget(IPrxOfType<F> prx) {
-    final source = foreignKey(this, prx);
-    final field = source.field();
+  Widget defaultTileWidget(PrxFieldOfMessageOfType<M, F> prx) {
+    final parent = prx.parent as PrxParentForFieldValueOfMessageOfType<M, F>;
+    final parentMessage = parent.message;
 
-    final length = source.mapOpt(field.length).orDefault(0);
+    final foreignMessage = foreignKey(this, parentMessage.toImpl);
 
-    return Builder(
-      builder: (context) {
-        return listTileWithFieldLabelTitle(
-          (o) => o.copyWith(
-            subtitle: length.rxText((v) => v.toString()),
-            onTap: () {
-              ScaffoldPage.show(context, title, body);
+    final foreignPrx = foreignFieldCrdt.prx(foreignMessage);
 
-            },
-          ),
-        );
-      }
-    );
+    return Builder(builder: (context) {
+      return listTileWithFieldLabelTitle(
+        (o) => o.copyWith(
+          subtitle: prx.asImpl().mapOpt((key) {
+            final item = foreignFieldCrdt.item(foreignPrx, key);
+            return foreignFieldCrdt.singleLabelWidget(key, item);
+          }).rxOrNull(),
+          onTap: () {
+            ScaffoldPage.show(
+              context,
+              label,
+              Placeholder(),
+            );
+          },
+        ),
+      );
+    });
   }
 }
-

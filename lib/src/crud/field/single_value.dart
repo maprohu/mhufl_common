@@ -16,7 +16,6 @@ abstract class CrdtFldSingle<M extends GeneratedMessage, F>
     extends CrdtFldFull<M, F> {
   @override
   late final PmSingleField<M, F> pmFld = crd.pmFld as PmSingleField<M, F>;
-
 }
 
 extension CrdtFldSingleFactoryX on CrdtFldSingle$Factory {
@@ -25,11 +24,10 @@ extension CrdtFldSingleFactoryX on CrdtFldSingle$Factory {
     final crfnForeignKey = crfn.foreignKey;
 
     if (crfnForeignKey != null) {
-      return crfnForeignKey.targetType(
-        <T>() {
-          final fk = crfnForeignKey.foreignKey;
-          return mk.CrdtFldSingleForeignKey.create<M, F, T>(
-            foreignKey: fk as ForeignKey<M, F, T>,
+      return crfnForeignKey.types(
+        <T extends GeneratedMessage, C, V>() {
+          return mk.CrdtFldSingleForeignKey.create<M, F, T, C, V>(
+            // crfnForeignKey: crfnForeignKey as CrfnForeignKeyFld<M, F, T, V>,
             crd: fld,
           );
         },
@@ -39,14 +37,12 @@ extension CrdtFldSingleFactoryX on CrdtFldSingle$Factory {
         boolType: () => mk.CrdtFldSingleBool.create(crd: fld),
         intType: () => mk.CrdtFldSingleInt.create(crd: fld),
         stringType: () => mk.CrdtFldSingleString.create(crd: fld),
-        enumType: (enumType) =>
-            enumType.payload.pmEnum.type$(
-              <TE extends ProtobufEnum>() =>
-                  mk.CrdtFldSingleEnum.create<M, TE>(
-                    enm: enumType.payload,
-                    crd: fld,
-                  ),
-            ),
+        enumType: (enumType) => enumType.payload.pmEnum.type$(
+          <TE extends ProtobufEnum>() => mk.CrdtFldSingleEnum.create<M, TE>(
+            enm: enumType.payload,
+            crd: fld,
+          ),
+        ),
       );
 
       return crdt as CrdtFldSingle<M, F>;
@@ -58,7 +54,7 @@ extension CrdtFldSingleFactoryX on CrdtFldSingle$Factory {
 abstract class CrdtFldSingleInt<M extends GeneratedMessage>
     extends CrdtFldSingle<M, int> {
   @override
-  Widget defaultTileWidget(IPrxOfType<int> prx) {
+  Widget defaultTileWidget(PrxOfType<int> prx) {
     return intTile(prx as RxVarImplOpt<int>);
   }
 
@@ -88,20 +84,19 @@ abstract class CrdtFldSingleInt<M extends GeneratedMessage>
 abstract class CrdtFldSingleString<M extends GeneratedMessage>
     extends CrdtFldSingle<M, String> {
   @override
-  Widget defaultTileWidget(IPrxOfType<String> prx) {
-    return stringTile(prx as RxVarImplOpt<String>);
-  }
+  Widget defaultTileWidget(PrxOfType<String> prx) =>
+      stringTile(prx as RxVar<Opt<String>>);
 
-  Widget stringTile(RxVarImplOpt<String> prx) {
+  Widget stringTile(RxVar<Opt<String>> prx) {
     return mk.CrudButton.data(
-      subtitle: prx.orDefault('<not set>'),
+      subtitle: prx.asImpl().orDefault('<not set>'),
       onTap: mk.RxVar.variable((context) {
         StringDialogEditor(
           title: label,
-          setter: prx.setHere,
+          setter: prx.asImpl().setHere,
         ).show(
           context,
-          prx.value.orDefault(''),
+          prx.asImpl().value.orDefault(''),
         );
       }),
       label: label,
@@ -113,11 +108,13 @@ abstract class CrdtFldSingleString<M extends GeneratedMessage>
 abstract class CrdtFldSingleBool<M extends GeneratedMessage>
     extends CrdtFldSingle<M, bool> {
   @override
-  Widget defaultTileWidget(IPrxOfType<bool> prx) {
+  Widget defaultTileWidget(PrxOfType<bool> prx) {
     return boolTile(prx as RxVarImplOpt<bool>);
   }
 
-  Widget boolTile(RxVarImplOpt<bool> prx,) {
+  Widget boolTile(
+    RxVarImplOpt<bool> prx,
+  ) {
     return mk.CrudSwitch.data(
       rxVar: prx.orDefaultVar(false),
       label: label,
@@ -127,7 +124,7 @@ abstract class CrdtFldSingleBool<M extends GeneratedMessage>
 
 @Impl.data()
 abstract class CrdtFldSingleEnum<M extends GeneratedMessage,
-F extends ProtobufEnum> extends CrdtFldSingle<M, F> {
+    F extends ProtobufEnum> extends CrdtFldSingle<M, F> {
   CrdEnum get enm;
 
   late final pmEnum = enm.pmEnum as PmEnum<F>;
@@ -135,7 +132,7 @@ F extends ProtobufEnum> extends CrdtFldSingle<M, F> {
   late final enumItems = pmEnum.values();
 
   @override
-  Widget defaultTileWidget(IPrxOfType<F> prx) {
+  Widget defaultTileWidget(PrxOfType<F> prx) {
     return enumTile(prx as RxVarImplOpt<F>);
   }
 
@@ -147,10 +144,9 @@ F extends ProtobufEnum> extends CrdtFldSingle<M, F> {
         SelectDialog.showModal<F>(
           context,
           items: enumItems,
-          itemBuilder: (context, item, isSelected) =>
-              ListTile(
-                title: Text(item.label),
-              ),
+          itemBuilder: (context, item, isSelected) => ListTile(
+            title: Text(item.label),
+          ),
           showSearchBox: false,
           onChange: (value) {
             prx.value = value.here();

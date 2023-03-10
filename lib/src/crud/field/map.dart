@@ -16,6 +16,13 @@ abstract class CrdtFldMap<M extends GeneratedMessage, K, V>
     extends CrdtFldCollection<M, Map<K, V>, K, V> {
   @override
   late final pmFld = crd.pmFld as PmMapField<M, K, V>;
+
+  @override
+  PrxSingleOfType$Impl<V> item(
+    PrxCollectionFieldOfMessageOfType<M, Map<K, V>> collectionVar,
+    K key,
+  ) =>
+      collectionVar.item(key);
 }
 
 @Impl.data()

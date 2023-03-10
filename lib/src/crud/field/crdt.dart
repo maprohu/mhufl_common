@@ -27,46 +27,46 @@ abstract class CrdtFld<M extends GeneratedMessage, F> {
 
   late final crfn = crud.crfn.field.call(fld.globalIndex) as CrfnFld<M, F>;
 
-  Widget defaultTileWidget(IPrxOfType<F> prx) => throw this;
+  Widget defaultTileWidget(PrxFieldOfMessageOfType<M, F> prx) => throw this;
 
   TileConfig defaultTileConfig<I>(
     I id,
-    IPrxOfType<F> prx,
+    PrxOfType<F> prx,
   ) =>
       mk.TileConfig.create(
         title: defaultTileConfigTitle(id, prx),
         subtitle: defaultTileConfigSubtitle(id, prx),
       );
 
-  Widget? defaultTileConfigTitle<I>(
+  Widget defaultTileConfigTitle<I>(
     I id,
-    IPrxOfType<F> prx,
+    PrxOfType<F> prx,
   ) =>
       throw this;
 
   Widget? defaultTileConfigSubtitle<I>(
     I id,
-    IPrxOfType<F> prx,
+    PrxOfType<F> prx,
   ) =>
       throw this;
 
-  Widget fieldTileWidget(PrxField prx) => tileWidget(prx as IPrxOfType<F>);
 
-  Widget tileWidget(IPrxOfType<F> prx) => crfn.tileWidget(this, prx);
+
+  Widget fieldTileWidget(PrxField prx) => tileWidget(prx as PrxFieldOfMessageOfType<M, F> );
+
+  Widget tileWidget(PrxFieldOfMessageOfType<M, F> prx) => crfn.tileWidget(this, prx);
 
   F ensure(M message) => throw [this, message];
 
-  Widget tileWidgetFromVar(IRxVarDefault<M> messageVar) =>
+  Widget tileWidgetFromMessageVar(PrxOfMessage<M> messageVar) =>
       tileWidget(prx(messageVar));
 
-  IPrxOfType<F> prx(IRxVarDefault<M> messageVar);
+  PrxFieldOfMessageOfType<M, F> prx(PrxOfMessage<M> messageVar);
 
   ListTile listTileWithFieldLabelTitle(Override<ListTile$Conf> ovr) =>
       ListTile$Conf(
         title: Text(label),
       ).let(ovr).create();
-
-
 
 }
 
@@ -78,13 +78,20 @@ abstract class CrdtFldRead<M extends GeneratedMessage, F>
 abstract class CrdtFldFull<M extends GeneratedMessage, F>
     extends CrdtFldRead<M, F> {
   @override
-  PmFullField<M, F> get pmFld;
+  PmFullFieldOfMessageOfType<M, F> get pmFld;
 
-  PrxSingleOfType$Impl<F> prx(IRxVarDefault<M> messageVar) =>
-      mk.PrxSingleOfType.fromFieldRebuilder<M, F>(
-        rxVar: messageVar,
-        field: pmFld,
-        rebuild: castProtoRebuilder,
+  @override
+  PrxSingleFieldOfMessageOfType<M, F> prx(PrxOfMessage<M> messageVar) =>
+      mk.PrxSingleFieldOfMessageOfType.fromPrxVarOfType(
+        prxVarOfType: mk.PrxVarOfType.prxSingleFromField<M, F>(
+          rxVar: messageVar.toImpl,
+          field: pmFld,
+          defaultValue: messageVar.asImpl().defaultValue.asConstant(),
+        ),
+        parent: mk.PrxParentForFieldValueOfMessageOfType.create<M, F>(
+          message: messageVar.toImpl,
+          field: pmFld,
+        ).asConstant(),
+        field: pmFld.asConstant(),
       );
 }
-

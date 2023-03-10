@@ -18,7 +18,6 @@ class ExampleApp extends StatefulWidget {
 }
 
 class _ExampleAppState extends State<ExampleApp> {
-  late final lookup = LookupImpl();
 
   late final exampleMessage = mk.RxVar.variable(
     Opt.here(
@@ -30,8 +29,7 @@ class _ExampleAppState extends State<ExampleApp> {
         },
       )..freeze(),
     ),
-    lookup: lookup,
-  ).also((o) => lookup.put(exampleRootKey, o)).prx;
+  ).prx;
 
   late final stringProp = exampleMessage.stringProp$;
 
@@ -63,8 +61,10 @@ class _ExampleAppState extends State<ExampleApp> {
 final messageFields = ExampleLib$MessageFieldOverrides<Override<CrfnFld>>(
   exampleMessage$$defaultItem: (o) =>
       o.castCrfn<ExampleMessage, int>().copyWith(
-            foreignKey: mk.CrfnForeignKeyFld.create<ExampleMessage, int, SomeItem>(
-              foreignKey: (fld, prx) => prx.lookup.get(exampleRootKey).items$,
+            // foreignKey: mk.CrfnForeignKeyFld.create<ExampleMessage, int, ExampleMessage, Map<int, SomeItem>, SomeItem>(
+            foreignKey: mk.CrfnForeignKeyFld.create(
+              foreignKey: (fld, prx) => prx,
+              field: ExampleLib$.exampleMessage.items,
             ),
           ),
 ).get;

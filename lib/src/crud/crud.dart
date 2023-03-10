@@ -12,7 +12,7 @@ import 'field/crdt.dart';
 
 part 'crud.g.dart';
 
-class CrdKey<T> extends KeyOf<IRxVar<Opt<T>>> {
+class CrdKey<T extends GeneratedMessage> extends KeyOf<IPrxMessageOfType<T>> {
   const CrdKey();
 }
 
@@ -97,10 +97,10 @@ abstract class Crud {
   //     );
 
   Widget tileWidgetFor(Prx prx) => prx.whenPrx(
-        message: (message) =>
-            resolveMessage(message.message()).crdt.messageTileWidget(message),
-        field: (field) =>
-            resolveField(field.field()).crdt.fieldTileWidget(field),
+    prxMessage: (prxMessage) =>
+            resolveMessage(prxMessage.message()).crdt.messageTileWidget(prxMessage),
+        prxField: (prxField) =>
+            resolveField(prxField.field()).crdt.fieldTileWidget(prxField),
       );
 }
 

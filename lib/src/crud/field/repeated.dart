@@ -14,16 +14,17 @@ part 'repeated.g.dart';
 @Impl.data()
 abstract class CrdtFldRepeated<M extends GeneratedMessage, V>
     extends CrdtFldCollection<M, List<V>, int, V> {
-  late final pmFld = crd.pmFld as PmRepeatedField<M, V>;
+  @override
+  late final PmRepeatedField<M, V> pmFld = crd.pmFld as PmRepeatedField<M, V>;
 
   @override
-  Widget defaultTileWidget(IPrxOfType<List<V>> prx) => repeatedTile(
-        prx: prx as IPrxCollectionOfType<List<V>>,
+  Widget defaultTileWidget(PrxOfType<List<V>> prx) => repeatedTile(
+        prx: (prx as IPrxCollectionOfType<List<V>>).toImpl,
         create: (index) => collectionItem.createNewItem(index),
       );
 
   Widget repeatedTile({
-    required IPrxCollectionOfType<List<V>> prx,
+    required PrxCollectionOfType$Impl<List<V>> prx,
     required V Function(int index) create,
   }) {
     return mk.CrudButton.data(
@@ -54,4 +55,11 @@ abstract class CrdtFldRepeated<M extends GeneratedMessage, V>
       }),
     );
   }
+
+  @override
+  PrxSingleOfType$Impl<V> item(
+    PrxCollectionFieldOfMessageOfType<M, List<V>> collectionVar,
+    int key,
+  ) =>
+      collectionVar.item(key);
 }

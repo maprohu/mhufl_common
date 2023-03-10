@@ -9,28 +9,50 @@ import 'crdt.dart';
 
 part 'collection.g.dart';
 
-abstract class CrdtFldCollection<M extends GeneratedMessage, F, I, V>
+abstract class CrdtFldCollection<M extends GeneratedMessage, F, K, V>
     extends CrdtFldRead<M, F> {
-  CrdtCollectionItem<I, V> get collectionItem;
+  CrdtCollectionItem<K, V> get collectionItem;
 
-  IPrxOfType<F> prx(IRxVarDefault<M> messageVar) =>
-      mk.PrxCollectionOfType.fromFieldRebuilder<M, F>(
-        rxVar: messageVar,
-        field: pmFld,
-        rebuild: castProtoRebuilder,
+  @override
+  PmCollectionFieldOfMessageOfType<M, F, V> get pmFld;
+
+  @override
+  PrxCollectionFieldOfMessageOfType<M, F> prx(PrxOfMessage<M> messageVar) =>
+      mk.PrxCollectionFieldOfMessageOfType.fromPrxCollectionFieldOfType(
+        prxCollectionFieldOfType:
+            mk.PrxCollectionFieldOfType.fromField<M, F, V>(
+          rxVar: messageVar.toImpl,
+          field: pmFld,
+        ),
       );
+
+  PrxSingleOfType$Impl<V> item(
+    PrxCollectionFieldOfMessageOfType<M, F> collectionVar,
+    K key,
+  );
+
+  Widget singleLabelWidget(
+    K id,
+    PrxOfType<V> prx,
+  ) =>
+      collectionItem.singleLabelWidget(id, prx);
 }
 
 @Impl()
 abstract class CrdtCollectionItem<I, V> {
   TileConfig tileConfig(
     I id,
-    IPrxOfType<V> prx,
+    PrxOfType<V> prx,
+  );
+
+  Widget singleLabelWidget(
+    I id,
+    PrxOfType<V> prx,
   );
 
   void onTap(
     BuildContext context,
-    IPrxSingleOfType<V> prx,
+    PrxSingleOfType<V> prx,
   );
 
   V createNewItem(I id);
@@ -54,12 +76,12 @@ extension CrdtCollectionItemX on CrdtCollectionItem$Factory {
   ) {
     return create(
       tileConfig: crd.tileConfig,
+      singleLabelWidget: crd.singleLabelWidget,
       onTap: (context, prx) => crd.showCrudPage(
         context: context,
-        rxVar: prx,
+        rxVar: prx as PrxOfMessage<V>,
       ),
       createNewItem: (id) => crd.emptyMessage,
     );
   }
-
 }
