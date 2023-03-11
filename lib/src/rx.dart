@@ -50,7 +50,9 @@ extension RxValStringWidgetX on IRxVal<String> {
 
 extension RxValOptStringWidgetX on IRxVal<Opt<String>> {
   Widget rxTextOrNull() => rxBuilderOrNull(
-        (context, value) => Text(value),
+        (context, value) => Text(
+          value,
+        ),
       );
 }
 

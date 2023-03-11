@@ -23,8 +23,6 @@ abstract class CrdtFld<M extends GeneratedMessage, F> {
         tileConfig: <I>(fld, id, prx) => fld.defaultTileConfig(id, prx),
       );
 
-  // late final defaultCrfn = createDefaultCrfn<M, F>();
-
   late final crfn = crud.crfn.field.call(fld.globalIndex) as CrfnFld<M, F>;
 
   Widget defaultTileWidget(PrxFieldOfMessageOfType<M, F> prx) => throw this;
@@ -66,7 +64,7 @@ abstract class CrdtFld<M extends GeneratedMessage, F> {
   ListTile listTileWithFieldLabelTitle(Override<ListTile$Conf> ovr) =>
       ListTile$Conf(
         title: Text(label),
-      ).let(ovr).create();
+      ).let(ovr).create$();
 
 }
 

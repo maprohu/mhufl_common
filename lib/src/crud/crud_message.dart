@@ -40,23 +40,47 @@ class CrdtMsg<M extends GeneratedMessage> {
 
   CrdtMsg(this.crd);
 
+  TileConfig defaultTileConfig<I>(
+      I id,
+      RxVal<Opt<M>> prx,
+      ) =>
+      mk.TileConfig.fromDisplayStrings<I, M>(
+        prx: prx,
+        title: (value) => displayTitleString(id, value),
+        subtitle: displaySubtitleString?.let(
+              (sub) => (value) => sub(id, value),
+        ),
+      );
+
+  Widget defaultSingleLabelWidget<I>(
+      I id,
+      RxVal<Opt<M>> prx,
+      ) =>
+      prx
+          .asData()
+          .mapOpt(
+            (value) => displayString(id, value),
+      )
+          .rxTextOrNull();
+
+  String defaultDisplayString<I>(I id, M value) => '($id)';
+
+  String defaultDisplayTitleString<I>(I id, M value) =>
+      displayString(id, value);
+
+
   static CrfnMsg<M> createDefaultCrfn<M extends GeneratedMessage>() =>
       mk.CrfnMsg.create<M>(
-        displayString: <I>(msg, id, value) => '($id)',
-        displayTitleString: <I>(msg, id, value) => msg.displayString(id, value),
+        displayString: <I>(msg, id, value) =>
+            msg.defaultDisplayString(id, value),
+        displayTitleString: <I>(msg, id, value) =>
+            msg.defaultDisplayTitleString(id, value),
         displaySubtitleString: null,
-        tileConfig: <I>(msg, id, prx) => mk.TileConfig.fromDisplayStrings<I, M>(
-          prx: prx,
-          title: (value) => msg.displayTitleString(id, value),
-          subtitle: msg.displaySubtitleString?.let(
-            (sub) => (value) => sub(id, value),
-          ),
-        ),
-        singleLabelWidget: <I>(msg, id, prx) => prx
-            .asImpl()
-            .mapOpt((value) => msg.displayString(id, value))
-            .rxTextOrNull(),
+        tileConfig: <I>(msg, id, prx) => msg.defaultTileConfig(id, prx),
+        singleLabelWidget: <I>(msg, id, prx) =>
+            msg.defaultSingleLabelWidget(id, prx),
       );
+
 
   late final crud = crd.crud;
   late final msg = crd.msg;

@@ -2,14 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mhudart_common/mhdart_common.dart';
 import 'package:mhufl_common/mhufl_common.dart';
 
-part 'widgets.g.dart';
+export 'package:mhufl_common_gen1/widget_conf.dart';
 
-@Conf([
-  ListTile,
-  RadioListTile,
-  Text,
-])
-class _GenerateWidgetConfs {}
+
 
 typedef ValueBuilder<T> = Widget Function(BuildContext context, T value);
 

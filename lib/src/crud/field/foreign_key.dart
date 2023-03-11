@@ -31,6 +31,7 @@ abstract class CrdtFldSingleForeignKey<M extends GeneratedMessage, F,
 
   @override
   Widget defaultTileWidget(PrxFieldOfMessageOfType<M, F> prx) {
+    prx as PrxSingleFieldOfMessageOfType<M, F>;
     final parent = prx.parent as PrxParentForFieldValueOfMessageOfType<M, F>;
     final parentMessage = parent.message;
 
@@ -41,15 +42,19 @@ abstract class CrdtFldSingleForeignKey<M extends GeneratedMessage, F,
     return Builder(builder: (context) {
       return listTileWithFieldLabelTitle(
         (o) => o.copyWith(
-          subtitle: prx.asImpl().mapOpt((key) {
+          subtitle: prx.asData().mapOpt((key) {
             final item = foreignFieldCrdt.item(foreignPrx, key);
-            return foreignFieldCrdt.singleLabelWidget(key, item);
+
+            return foreignFieldCrdt.singleLabelWidget(key, item).withKey(key);
           }).rxOrNull(),
           onTap: () {
             ScaffoldPage.show(
               context,
               label,
-              Placeholder(),
+              foreignFieldCrdt.selectPage(
+                foreignPrx,
+                prx,
+              ),
             );
           },
         ),

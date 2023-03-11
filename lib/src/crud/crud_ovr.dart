@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mhudart_common/mhdart_common.dart';
+import 'package:mhufl_common/mhufl_common.dart';
 import 'package:mhufl_common/src/crud/crud_control.dart';
 import 'package:protobuf/protobuf.dart';
 
@@ -67,6 +68,7 @@ abstract class CrfnMsg<M extends GeneratedMessage> {
   MessageTileConfigProvider<M> get tileConfig;
 
   MessageWidgetProvider<M> get singleLabelWidget;
+
 }
 
 /// [ICrfnFld]
@@ -89,6 +91,12 @@ abstract class CrfnForeignKeyFld<M extends GeneratedMessage, K,
   R types<R>(R Function<TFM extends GeneratedMessage, TFC, TFV>() fn) =>
       fn<FM, FC, FV>();
 }
+
+@Impl.data()
+abstract class WidgetOvr<C extends Factory$<Widget>>
+    extends FactoryOvr<Widget, C> {}
+
+typedef ListTileOvr = WidgetOvr<ListTile$Conf>;
 
 extension CrdOvrStringX on String {
   String orId<I>(I id) => orIfEmpty(() => id.toString().paren);

@@ -36,6 +36,11 @@ abstract class CrdtFldCollection<M extends GeneratedMessage, F, K, V>
     PrxOfType<V> prx,
   ) =>
       collectionItem.singleLabelWidget(id, prx);
+
+  Widget selectPage(
+      PrxCollectionFieldOfMessageOfType<M, F> collectionVar,
+      RxVar<Opt<K>> keyVar,
+  ) => throw this;
 }
 
 @Impl()
@@ -56,6 +61,7 @@ abstract class CrdtCollectionItem<I, V> {
   );
 
   V createNewItem(I id);
+
 }
 
 extension CrdtCollectionItemX on CrdtCollectionItem$Factory {

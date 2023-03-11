@@ -8,6 +8,8 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  mhufl_common_gen1:
+    path: gen1
   built_collection: ^5.1.1
   flutter:
     sdk: flutter

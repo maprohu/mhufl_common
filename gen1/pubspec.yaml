@@ -1,0 +1,23 @@
+name: mhufl_common_gen1
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: '>=2.19.2 <3.0.0'
+
+dependencies:
+  mhudart_base:
+    path: ../../mhudart_base
+  mhudart_io:
+    path: ../../mhudart_io
+  built_collection: ^5.1.1
+  kt_dart: ^1.0.0
+  rxdart: ^0.27.7
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  build_runner: ^2.3.3
+  mhudart_generator_base:
+    path: ../../mhudart_generator_base
+  source_gen: ^1.2.7

@@ -18,13 +18,15 @@ class ExampleApp extends StatefulWidget {
 }
 
 class _ExampleAppState extends State<ExampleApp> {
-
   late final exampleMessage = mk.RxVar.variable(
     Opt.here(
       ExampleMessage(
         items: {
           1: SomeItem(
             stringProp: 'hello',
+          ),
+          2: SomeItem(
+            stringProp: 'bello',
           ),
         },
       )..freeze(),
